@@ -49,7 +49,7 @@
 
 ```bash
 # 1. 克隆仓库
-git clone https://github.com/Aurora304/daily-task-tracker.git
+git clone https://github.com/LumiousAurora3416/daily-task-tracker.git
 cd daily-task-tracker
 
 # 2. 创建虚拟环境并安装依赖
