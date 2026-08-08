@@ -100,7 +100,6 @@ daily-task-tracker/
 ├── main.py                      # 程序入口
 ├── requirements.txt             # 依赖列表
 ├── design_doc.md                # 技术方案文档
-├── PRD.md                       # 产品需求文档
 ├── src/
 │   ├── core/                    # 核心业务逻辑
 │   │   ├── data_storage.py      # SQLite 数据持久化
@@ -149,16 +148,13 @@ daily-task-tracker/
 - [ ] **v1.2 可视化与备份** — 浮动番茄钟、托盘倒计时、JSON 导入导出、统计图表
 - [ ] **v2.0 分发就绪** — PyInstaller 打包、macOS .dmg / Windows .exe、开机自启、全局快捷键
 
-详见 [PRD.md](./PRD.md)。
-
 ## 📝 文档
 
-- [PRD.md](./PRD.md) — 产品需求文档
 - [design_doc.md](./design_doc.md) — 技术实现方案
 
 ## 🤝 贡献
 
-欢迎提 Issue 和 Pull Request。开发前请先阅读 [PRD.md](./PRD.md) 了解产品方向。
+欢迎提 Issue 和 Pull Request。开发前请先阅读 [design_doc.md](./design_doc.md) 了解技术方案。
 
 ## 📄 许可证
 
