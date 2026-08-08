@@ -1,0 +1,2 @@
+PySide6>=6.6.0
+# Python 标准库已包含：sqlite3, json, datetime, threading
