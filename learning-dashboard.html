@@ -1,0 +1,2116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#7C3AED">
+<title>学习目标工作台</title>
+<style>
+/* ============ 块2占位（CSS由后续块追加） ============ */
+
+/* ========== 基础与色彩系统 ========== */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F9FAFC;                  /* 冷白色背景 */
+  --bg-card:#FFFFFF;
+  --text:#1F2937;
+  --text-sec:#6B7280;
+  --border:#E5E7EB;
+  --primary:#7C3AED;             /* 紫色主色 */
+  --primary-2:#A855F7;
+  --primary-bg:#F5F3FF;
+  --success:#10B981;             /* 成功绿 */
+  --success-bg:#ECFDF5;
+  --danger:#EF4444;              /* 逾期红 */
+  --danger-bg:#FEF2F2;
+  --warn:#F59E0B;                /* 休息日琥珀 */
+  --warn-bg:#FFFBEB;
+  --makeup:#8B5CF6;              /* 补记紫 */
+  --radius:14px;
+  --radius-sm:10px;
+  --shadow:0 1px 2px rgba(0,0,0,.04), 0 4px 16px rgba(124,58,237,.06);
+  --shadow-lg:0 10px 30px rgba(124,58,237,.12);
+  --grad:linear-gradient(135deg,#7C3AED 0%,#A855F7 100%);
+}
+html,body{height:100%}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Roboto,sans-serif;
+  font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;
+  padding-top:0;padding-bottom:64px;
+}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,textarea,select{font-family:inherit;font-size:14px;color:var(--text)}
+svg{display:block;flex-shrink:0}
+
+/* ========== 布局：手机默认（底部Tab + 单列） ========== */
+.app{display:flex;flex-direction:column;min-height:100vh;max-width:100%}
+.sidebar{display:none}
+.topbar{display:none}
+.banner{
+  background:linear-gradient(90deg,#FEF3C7,#FDE68A);
+  color:#92400E;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;
+  font-size:13px;position:sticky;top:0;z-index:50;
+}
+.banner button{background:#fff;border:1px solid #F59E0B;color:#92400E;padding:4px 10px;border-radius:6px;font-size:12px}
+.main{flex:1;padding:12px 14px 24px;overflow-x:hidden}
+.content{max-width:100%}
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.page-title{font-size:18px;font-weight:700;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+/* 底部Tab */
+.tabbar{
+  position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--border);
+  display:grid;grid-template-columns:repeat(4,1fr);z-index:100;padding:6px 0 calc(6px + env(safe-area-inset-bottom));
+}
+.tabbar .tab-btn{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 4px;color:var(--text-sec);font-size:11px}
+.tabbar .tab-btn.active{color:var(--primary)}
+.tabbar .tab-btn svg{width:22px;height:22px}
+
+/* 平板：顶部Tab + 稍宽留白 */
+@media(min-width:768px){
+  body{padding-bottom:0}
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50}
+  .brand{display:flex;align-items:center;gap:10px;font-size:17px;font-weight:700;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .top-tabs{display:flex;gap:4px;background:var(--bg);padding:4px;border-radius:12px}
+  .top-tabs .tab-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:9px;color:var(--text-sec);font-size:13px;font-weight:500}
+  .top-tabs .tab-btn.active{background:#fff;color:var(--primary);box-shadow:var(--shadow)}
+  .top-tabs .tab-btn svg{width:18px;height:18px}
+  .tabbar{display:none}
+  .main{padding:24px 28px 48px}
+  .content{max-width:960px;margin:0 auto}
+}
+
+/* 电脑：左侧边栏 + 多栏 */
+@media(min-width:1200px){
+  .app{flex-direction:row;flex-wrap:wrap;align-items:flex-start}
+  .banner{width:100%}
+  .sidebar{
+    display:flex;flex-direction:column;gap:18px;width:240px;flex-shrink:0;
+    padding:24px 18px;border-right:1px solid var(--border);background:#fff;
+  }
+  .sidebar-brand{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:800;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;padding:4px 8px}
+  .side-nav{display:flex;flex-direction:column;gap:4px}
+  .side-nav .tab-btn{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;color:var(--text-sec);font-size:14px;font-weight:500;text-align:left}
+  .side-nav .tab-btn:hover{background:var(--primary-bg)}
+  .side-nav .tab-btn.active{background:var(--grad);color:#fff;box-shadow:var(--shadow)}
+  .side-nav .tab-btn svg{width:18px;height:18px}
+  .side-footer{margin-top:auto;font-size:12px;color:var(--text-sec);padding:8px}
+  .topbar{display:none}
+  .main{flex:1;min-width:0;padding:28px 40px 80px 40px}
+  .content{max-width:1100px}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+}
+
+/* ========== 通用组件 ========== */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  padding:9px 16px;border-radius:10px;font-weight:600;font-size:14px;transition:.15s;
+  white-space:nowrap;
+}
+.btn svg{width:16px;height:16px}
+.btn-primary{background:var(--grad);color:#fff;box-shadow:var(--shadow)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:var(--shadow-lg)}
+.btn-outline{background:#fff;border:1px solid var(--border);color:var(--text)}
+.btn-outline:hover{border-color:var(--primary);color:var(--primary)}
+.btn-danger{background:var(--danger-bg);color:var(--danger);border:1px solid #FECACA}
+.btn-success{background:var(--success-bg);color:var(--success);border:1px solid #A7F3D0}
+.btn-ghost{color:var(--text-sec)}
+.btn-ghost:hover{background:var(--bg)}
+.btn-lg{padding:14px 20px;font-size:15px;border-radius:12px}
+.btn-block{width:100%}
+
+.card{background:var(--bg-card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;border:1px solid var(--border)}
+.card + .card{margin-top:12px}
+.card-header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px}
+.card-title{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px}
+.card-sub{font-size:12px;color:var(--text-sec);margin-top:2px}
+.card-dot{width:10px;height:10px;border-radius:50%}
+
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.field label{font-size:13px;font-weight:600;color:var(--text)}
+.field input,.field textarea,.field select{
+  border:1px solid var(--border);border-radius:10px;padding:9px 12px;background:#fff;
+  outline:none;transition:.15s;
+}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(124,58,237,.1)}
+.field textarea{min-height:70px;resize:vertical}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.hint{font-size:12px;color:var(--text-sec)}
+.schedule-modes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.schedule-mode{position:relative;cursor:pointer}
+.schedule-mode input{position:absolute;opacity:0;pointer-events:none}
+.schedule-mode span{
+  display:flex;align-items:center;justify-content:center;min-height:38px;padding:8px 10px;
+  border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--text-sec);
+  font-size:13px;font-weight:600;transition:.15s;
+}
+.schedule-mode input:checked + span{border-color:var(--primary);background:var(--primary-bg);color:var(--primary)}
+.weekday-picker{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.weekday-option{position:relative;cursor:pointer}
+.weekday-option input{position:absolute;opacity:0;pointer-events:none}
+.weekday-option span{
+  width:34px;height:34px;display:flex;align-items:center;justify-content:center;
+  border:1px solid var(--border);border-radius:50%;background:#fff;color:var(--text-sec);
+  font-size:12px;font-weight:700;transition:.15s;
+}
+.weekday-option input:checked + span{border-color:var(--primary);background:var(--primary);color:#fff}
+
+/* ========== 徽章 / 状态标识 ========== */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:600;line-height:1.4}
+.badge-success{background:var(--success-bg);color:var(--success)}
+.badge-danger{background:var(--danger-bg);color:var(--danger)}
+.badge-warn{background:var(--warn-bg);color:#B45309}
+.badge-makeup{background:#EDE9FE;color:var(--makeup)}
+.badge-idle{background:#F3F4F6;color:#6B7280}
+.badge-primary{background:var(--primary-bg);color:var(--primary)}
+
+/* 目标卡片状态边色 */
+.goal-card{border-left:4px solid var(--primary);position:relative}
+.goal-card.rest-card{border-left-color:var(--warn)}
+.goal-card.miss-card{border-left-color:var(--danger)}
+.goal-card.overdue-card{border-left-color:var(--danger);background:linear-gradient(90deg,#FEF2F2 0%,#fff 30%)}
+.goal-card.yesterday-miss{background:linear-gradient(90deg,#FEF2F2 0%,#fff 18%)}
+
+/* ========== 进度环 ========== */
+.ring-row{display:flex;align-items:center;gap:16px;margin-bottom:12px}
+.ring{position:relative;width:80px;height:80px;flex-shrink:0}
+.ring svg{transform:rotate(-90deg)}
+.ring .ring-bg{stroke:#F3F4F6;fill:none;stroke-width:8}
+.ring .ring-fg{fill:none;stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset .6s ease}
+.ring-text{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px}
+.ring-stat-box{flex:1;min-width:0}
+.ring-triplet{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px}
+.ring-triplet .n{font-size:18px;font-weight:800}
+.ring-triplet .l{font-size:11px;color:var(--text-sec)}
+
+/* ========== 目标卡（今日Tab） ========== */
+.goal-name{font-size:16px;font-weight:700}
+.goal-progress{height:6px;background:#F3F4F6;border-radius:99px;margin:10px 0 6px;overflow:hidden}
+.goal-progress > div{height:100%;border-radius:99px;transition:width .4s}
+.goal-meta{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:12px;color:var(--text-sec);margin-bottom:8px}
+.plan-box{
+  background:var(--warn-bg);border:1px dashed #FCD34D;border-radius:10px;
+  padding:10px 12px;margin:10px 0 12px;font-size:12.5px;line-height:1.7;
+}
+.plan-box strong{color:#B45309;margin-right:4px}
+.quick-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.amount-input{
+  display:inline-flex;align-items:center;background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden;
+}
+.amount-input input{border:none;outline:none;width:80px;padding:8px 10px;text-align:center;font-weight:700;font-size:15px}
+.amount-input .unit{padding:0 10px;color:var(--text-sec);font-size:12px;border-left:1px solid var(--border)}
+.minute-chip{display:inline-flex;align-items:center;gap:4px;padding:6px 10px;background:#F3F4F6;color:var(--text-sec);border-radius:8px;font-size:12px}
+.minute-chip svg{width:14px;height:14px;flex-shrink:0}
+.minute-chip input{width:44px;border:none;outline:none;background:transparent;font-weight:600;text-align:center;color:var(--text)}
+.action-icons{display:flex;gap:2px;align-items:center}
+.icon-btn{width:32px;height:32px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;color:var(--text-sec)}
+.icon-btn:hover{background:var(--bg);color:var(--primary)}
+.icon-btn.danger:hover{background:var(--danger-bg);color:var(--danger)}
+.icon-btn svg{width:16px;height:16px}
+
+.overdue-footer{
+  margin-top:10px;padding-top:10px;border-top:1px dashed #FECACA;
+  display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:12.5px;color:#B91C1C;
+}
+
+/* ========== 看板 Tab ========== */
+.kanban-card .records-list{margin-top:10px;border-top:1px solid var(--border);padding-top:10px}
+.rec-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:7px 4px;border-radius:8px;font-size:13px;
+}
+.rec-item:hover{background:var(--bg)}
+.rec-left{display:flex;align-items:center;gap:8px;min-width:0}
+.rec-date{color:var(--text-sec);font-size:12px;flex-shrink:0}
+.rec-amount{font-weight:700}
+.rec-min{font-size:11px;color:var(--text-sec)}
+
+/* SVG柱状图容器 */
+.chart-wrap{margin-top:12px;padding:10px;background:var(--bg);border-radius:10px}
+.chart-title{font-size:12px;font-weight:600;color:var(--text-sec);margin-bottom:8px}
+
+/* ========== 周报 Tab ========== */
+.week-switch{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.week-title{font-size:16px;font-weight:700}
+.compare-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.stat-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:14px;box-shadow:var(--shadow)}
+.stat-card .label{font-size:12px;color:var(--text-sec);margin-bottom:6px}
+.stat-card .value{font-size:22px;font-weight:800}
+.stat-card .delta{font-size:12px;margin-top:4px;font-weight:600}
+.delta-up{color:var(--success)}
+.delta-down{color:var(--danger)}
+.delta-flat{color:var(--text-sec)}
+
+.goal-week-table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;margin:8px 0 16px;background:var(--bg-card);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.goal-week-table th,.goal-week-table td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--border)}
+.goal-week-table th{background:var(--primary-bg);color:var(--primary);font-size:12px;font-weight:700}
+.goal-week-table tr:last-child td{border-bottom:none}
+
+.notes-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+@media(max-width:767px){.notes-grid{grid-template-columns:1fr}}
+.notes-grid textarea{min-height:96px;border:1px solid var(--border);border-radius:10px;padding:10px;outline:none;resize:vertical}
+.notes-grid textarea:focus{border-color:var(--primary)}
+.notes-grid .note-label{font-size:12px;font-weight:700;color:var(--text);margin-bottom:5px;display:flex;align-items:center;gap:5px}
+
+.report-box{background:#1F2937;color:#F9FAFB;padding:14px;border-radius:12px;margin-top:14px;font-family:"SFMono-Regular",Menlo,Consolas,monospace;font-size:12.5px;line-height:1.7;white-space:pre-wrap;word-break:break-word}
+
+/* ========== 我的 Tab ========== */
+.section-title{font-size:14px;font-weight:700;margin:16px 0 8px;display:flex;align-items:center;gap:6px}
+.section-title svg{width:18px;height:18px;flex-shrink:0}
+.data-card{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;margin-bottom:10px;box-shadow:var(--shadow)}
+.data-info{flex:1;min-width:0}
+.data-info .t{font-weight:700;font-size:14px;margin-bottom:3px}
+.data-info .d{font-size:12px;color:var(--text-sec)}
+.homescreen-steps{display:flex;flex-direction:column;gap:14px;margin-top:8px}
+.hs-step{display:flex;gap:12px;align-items:flex-start}
+.hs-step-num{width:30px;height:30px;border-radius:50%;background:var(--grad);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;box-shadow:var(--shadow)}
+.hs-step-body{flex:1}
+.hs-step-body h4{font-size:14px;font-weight:700;margin-bottom:4px}
+.hs-step-body p{font-size:12.5px;color:var(--text-sec);line-height:1.7}
+
+/* ========== 模态层 ========== */
+.modal-mask{
+  position:fixed;inset:0;background:rgba(17,24,39,.5);backdrop-filter:blur(3px);
+  display:flex;align-items:center;justify-content:center;z-index:999;
+  padding:16px;animation:fadein .2s;
+}
+.modal{
+  background:#fff;border-radius:16px;width:100%;max-width:520px;max-height:86vh;overflow:auto;
+  box-shadow:var(--shadow-lg);animation:popin .2s;
+}
+.modal-head{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-head h3{font-size:16px;font-weight:700}
+.modal-body{padding:18px 20px}
+.modal-foot{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end}
+
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+@keyframes popin{from{transform:translateY(12px) scale(.97);opacity:0}to{transform:none;opacity:1}}
+
+/* ========== Toast ========== */
+.toast-wrap{position:fixed;left:50%;top:20px;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{background:#1F2937;color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;box-shadow:var(--shadow-lg);animation:toastin .25s}
+.toast.success{background:var(--success)}
+.toast.error{background:var(--danger)}
+@keyframes toastin{from{transform:translateY(-8px);opacity:0}to{transform:none;opacity:1}}
+
+/* ========== 彩带 ========== */
+.confetti-layer{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:9998}
+.confetti{position:absolute;width:8px;height:12px;top:-10%;animation:fall 2.6s linear forwards;transform:rotate(45deg)}
+@keyframes fall{
+  0%{transform:translateY(0) rotate(0)}
+  100%{transform:translateY(110vh) rotate(720deg);opacity:0}
+}
+
+/* ========== 空态 ========== */
+.empty{padding:50px 20px;text-align:center;color:var(--text-sec)}
+.empty svg{width:64px;height:64px;margin:0 auto 12px;opacity:.5}
+.empty h4{font-size:15px;font-weight:700;margin-bottom:6px;color:var(--text)}
+.empty p{font-size:13px}
+
+/* ========== 顶部大按钮 & 底部再入口 ========== */
+.hero-create{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  background:var(--grad);color:#fff;border-radius:14px;padding:16px;font-weight:700;font-size:15px;
+  box-shadow:var(--shadow-lg);margin-bottom:14px;
+}
+.hero-create svg{width:20px;height:20px}
+.bottom-create{
+  margin-top:24px;padding:14px;background:var(--primary-bg);border-radius:14px;
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  border:1px dashed #C4B5FD;
+}
+.bottom-create p{font-size:13px;color:var(--primary);font-weight:500}
+
+/* ========== 番茄钟浮动条 ========== */
+.pomo-bar{
+  position:fixed;left:50%;bottom:80px;transform:translateX(-50%);
+  background:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.15);
+  display:none;align-items:center;gap:12px;padding:10px 16px;z-index:200;
+  min-width:320px;max-width:90vw;
+}
+@media(min-width:768px){.pomo-bar{bottom:24px}}
+.pomo-info{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;white-space:nowrap}
+.pomo-time{
+  color:#fff;padding:3px 10px;border-radius:8px;font-family:Menlo,monospace;font-size:15px;font-weight:800;
+}
+.pomo-progress{flex:1;height:6px;background:#F3F4F6;border-radius:99px;overflow:hidden;min-width:80px}
+.pomo-progress > div{height:100%;border-radius:99px;transition:width .3s}
+.pomo-actions{display:flex;gap:6px;flex-shrink:0}
+/* 番茄钟设置区（在今日Tab顶部） */
+.pomo-setup{
+  display:flex;align-items:center;gap:10px;padding:10px 14px;
+  background:var(--primary-bg);border-radius:12px;margin-bottom:12px;
+}
+.pomo-setup label{font-size:13px;font-weight:600;color:var(--primary)}
+.pomo-setup input[type=number]{
+  width:60px;padding:5px 8px;border:1px solid #C4B5FD;border-radius:8px;text-align:center;font-weight:700;
+}
+.pomo-setup .hint{color:var(--primary);opacity:.7}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <!-- 备份横幅（JS动态显示） -->
+  <div id="backupBanner" class="banner" style="display:none">
+    <span id="bannerText">💡 您已累积 20 条打卡记录，建议导出备份以防数据丢失</span>
+    <button id="bannerExportBtn">立即导出</button>
+  </div>
+
+  <!-- 电脑：左侧边栏 -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      学习工作台
+    </div>
+    <nav class="side-nav" id="sideNav"></nav>
+    <div class="side-footer" id="sideFooter"></div>
+  </aside>
+
+  <div class="main">
+    <!-- 平板：顶部导航 -->
+    <div class="topbar">
+      <div class="brand">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="url(#g1)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7C3AED"/><stop offset="1" stop-color="#A855F7"/></linearGradient></defs><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        学习目标工作台
+      </div>
+      <div class="top-tabs" id="topTabs"></div>
+    </div>
+
+    <div class="content">
+      <!-- 今日 Tab -->
+      <section id="tab-today" class="tab-panel"></section>
+      <!-- 看板 Tab -->
+      <section id="tab-kanban" class="tab-panel" style="display:none"></section>
+      <!-- 周报 Tab -->
+      <section id="tab-weekly" class="tab-panel" style="display:none"></section>
+      <!-- 我的 Tab -->
+      <section id="tab-mine" class="tab-panel" style="display:none"></section>
+    </div>
+  </div>
+
+  <!-- 手机：底部 Tab 导航 -->
+  <nav class="tabbar" id="tabbar"></nav>
+</div>
+
+<!-- 模态层容器 -->
+<div id="modalRoot"></div>
+<!-- 番茄钟浮动条 -->
+<div id="pomoBar" class="pomo-bar"></div>
+<div id="toastRoot" class="toast-wrap"></div>
+<div id="confettiRoot" class="confetti-layer"></div>
+
+<script>
+/* ========== 全局状态 ========== */
+const LS_KEY = 'learning_dashboard_v1';
+const TAB_LIST = [
+  {key:'today',   name:'今日',   icon:'TODAY'},
+  {key:'kanban',  name:'看板',   icon:'KANBAN'},
+  {key:'weekly',  name:'周报',   icon:'WEEKLY'},
+  {key:'mine',    name:'我的',   icon:'MINE'},
+];
+const COLOR_PALETTE = [
+  {name:'紫萝', bg:'#7C3AED', light:'#F5F3FF'},
+  {name:'海蓝', bg:'#2563EB', light:'#EFF6FF'},
+  {name:'翠绿', bg:'#059669', light:'#ECFDF5'},
+  {name:'橙火', bg:'#EA580C', light:'#FFF7ED'},
+  {name:'玫红', bg:'#DB2777', light:'#FDF2F8'},
+  {name:'青蓝', bg:'#0891B2', light:'#ECFEFF'},
+  {name:'金黄', bg:'#D97706', light:'#FFFBEB'},
+  {name:'石墨', bg:'#475569', light:'#F1F5F9'},
+];
+const state = {
+  activeTab: 'today',
+  goals: [],         // {id,name,unit,total,deadline,color,obstacle,strategy,scheduleType,repeatDays,createdAt}
+  records: [],       // {id,goalId,date(YYYY-MM-DD),amount,minutes,isMakeup,isRestDay,note}
+  reports: {},       // {[weekStartStr]: {keep,problem,try,planNext}}
+  currentWeekStart: null,   // 周报当前显示的周起始（周一日期）
+  backupReminderDismissed: false,
+  // 番茄钟：phase=idle/working/break/paused, currentGoalId 绑定的目标
+  pomodoro: {
+    phase: 'idle',
+    remaining: 0,        // 剩余秒
+    total: 0,            // 总秒
+    workMinutes: 25,     // 工作时长（可自定义）
+    breakMinutes: 5,     // 休息时长
+    currentGoalId: null, // 当前专注的目标
+    goalTitle: '',
+  },
+};
+let pomoTimer = null;  // setInterval handle
+
+/* ========== 工具函数 ========== */
+function uid(){ return 'id_' + Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+function pad(n){ return n<10?('0'+n):(''+n); }
+function todayStr(){ const d = new Date(); return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+function addDaysStr(s, n){
+  const [y,m,d]=s.split('-').map(Number); const dt=new Date(y,m-1,d); dt.setDate(dt.getDate()+n);
+  return dt.getFullYear()+'-'+pad(dt.getMonth()+1)+'-'+pad(dt.getDate());
+}
+function diffDays(a, b){  // a - b (YYYY-MM-DD)
+  const [ya,ma,da]=a.split('-').map(Number);
+  const [yb,mb,db]=b.split('-').map(Number);
+  return Math.round((new Date(ya,ma-1,da) - new Date(yb,mb-1,db))/86400000);
+}
+function isoWeekday(s){ const [y,m,d]=s.split('-').map(Number); return (new Date(y,m-1,d).getDay()+6)%7 + 1; } // 1=Mon..7=Sun
+function weekStart(s){ const offset = (isoWeekday(s)-1); return addDaysStr(s, -offset); }  // 返回周一日期
+function formatNum(x){ if(x===null||x===undefined||isNaN(x))return '0'; return Number.isInteger(x)?String(x):(Math.round(x*10)/10).toString(); }
+function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+const ALL_WEEKDAYS = [1,2,3,4,5,6,7];
+const WORK_WEEKDAYS = [1,2,3,4,5];
+const WEEKDAY_NAMES = ['一','二','三','四','五','六','日'];
+
+function normalizeGoalSchedule(goal){
+  const type = ['daily','weekdays','custom'].includes(goal.scheduleType) ? goal.scheduleType : 'daily';
+  let days = type === 'daily' ? ALL_WEEKDAYS : type === 'weekdays' ? WORK_WEEKDAYS : goal.repeatDays;
+  days = Array.isArray(days)
+    ? [...new Set(days.map(Number).filter(d=>d>=1 && d<=7))].sort((a,b)=>a-b)
+    : [];
+  if(days.length === 0){ days = [...ALL_WEEKDAYS]; }
+  return {...goal, scheduleType:type, repeatDays:days};
+}
+function goalScheduleDays(goal){ return normalizeGoalSchedule(goal).repeatDays; }
+function isGoalScheduledOn(goal, date){
+  if(!goal || !date) return false;
+  if(goal.createdAt && diffDays(date, goal.createdAt.slice(0,10)) < 0) return false;
+  return goalScheduleDays(goal).includes(isoWeekday(date));
+}
+function goalScheduleLabel(goal){
+  const normalized = normalizeGoalSchedule(goal);
+  if(normalized.scheduleType === 'daily') return '每天';
+  if(normalized.scheduleType === 'weekdays') return '工作日';
+  return normalized.repeatDays.map(d=>`周${WEEKDAY_NAMES[d-1]}`).join('、');
+}
+function countScheduledDays(goal, start, end){
+  if(diffDays(end, start) < 0) return 0;
+  let count = 0;
+  let cur = start;
+  let safety = 4000;
+  while(diffDays(end, cur) >= 0 && safety-- > 0){
+    if(isGoalScheduledOn(goal, cur)) count++;
+    cur = addDaysStr(cur, 1);
+  }
+  return count;
+}
+
+/* ========== 数据层（localStorage） ========== */
+function saveAll(){
+  try{ localStorage.setItem(LS_KEY, JSON.stringify({
+    goals:state.goals, records:state.records, reports:state.reports,
+    backupReminderDismissed:state.backupReminderDismissed,
+    pomoWorkMinutes:state.pomodoro.workMinutes,
+    pomoBreakMinutes:state.pomodoro.breakMinutes,
+  })); }catch(e){ toast('保存失败：'+e.message, 'error'); }
+}
+function loadAll(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    if(!raw) return false;
+    const data = JSON.parse(raw);
+    if(Array.isArray(data.goals)) state.goals = data.goals.map(normalizeGoalSchedule);
+    if(Array.isArray(data.records)) state.records = data.records;
+    if(data.reports && typeof data.reports==='object') state.reports = data.reports;
+    if(typeof data.backupReminderDismissed === 'boolean') state.backupReminderDismissed = data.backupReminderDismissed;
+    if(typeof data.pomoWorkMinutes === 'number') state.pomodoro.workMinutes = data.pomoWorkMinutes;
+    if(typeof data.pomoBreakMinutes === 'number') state.pomodoro.breakMinutes = data.pomoBreakMinutes;
+    return true;
+  }catch(e){ console.warn('load error',e); return false; }
+}
+
+/* ========== Toast / Modal 工具 ========== */
+function toast(msg, kind='info'){
+  const root = document.getElementById('toastRoot');
+  const el = document.createElement('div');
+  el.className = 'toast ' + (kind==='success'||kind==='error'?kind:'');
+  el.textContent = msg;
+  root.appendChild(el);
+  setTimeout(()=>{ el.style.opacity='0'; el.style.transition='.2s'; }, 1800);
+  setTimeout(()=>el.remove(), 2200);
+}
+function modal({title, bodyHTML, footer, onMount, width}){
+  const root = document.getElementById('modalRoot');
+  const mask = document.createElement('div');
+  mask.className = 'modal-mask';
+  let bodyNode;
+  mask.innerHTML = `<div class="modal" ${width?('style="max-width:'+width+'"'):''}>
+    <div class="modal-head">
+      <h3>${title}</h3>
+      <button class="icon-btn" data-close aria-label="关闭">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">${bodyHTML}</div>
+    ${footer?`<div class="modal-foot">${footer}</div>`:''}
+  </div>`;
+  mask.addEventListener('click',(e)=>{ if(e.target===mask || e.target.closest('[data-close]')) close(); });
+  function close(){ mask.remove(); }
+  mask._close = close;
+  root.appendChild(mask);
+  bodyNode = mask.querySelector('.modal-body');
+  if(onMount) onMount(bodyNode, close);
+  return {el:mask, close, body:bodyNode};
+}
+function confirmModal({title, message, confirmText='确认', cancelText='取消', danger=false, onConfirm}){
+  modal({
+    title,
+    bodyHTML: `<p style="line-height:1.7;color:#374151">${message}</p>`,
+    footer: `<button class="btn btn-outline" data-cancel>${cancelText}</button>
+             <button class="btn ${danger?'btn-danger':'btn-primary'}" data-ok>${confirmText}</button>`,
+    onMount: (body, close)=>{
+      body.parentElement.querySelector('[data-cancel]').onclick = close;
+      body.parentElement.querySelector('[data-ok]').onclick = ()=>{ close(); onConfirm && onConfirm(); };
+    }
+  });
+}
+
+/* ========== SVG 图标库（按名获取内联SVG字符串） ========== */
+const SVG = {
+  TODAY: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
+  KANBAN:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>`,
+  WEEKLY:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`,
+  MINE:  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
+  PLUS:  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
+  EDIT:  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,
+  TRASH: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>`,
+  CLOSE: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+  CHECK: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+  BACK:  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>`,
+  FORWARD:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`,
+  EXPORT:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`,
+  IMPORT:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>`,
+  COPY:  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`,
+  WARN:  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+  GOAL:  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>`,
+  CLOCK: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+  DOWNLOAD:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`,
+  SHARE: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>`,
+  SPARK:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>`,
+};
+function svgi(key){ return SVG[key] || SVG.GOAL; }
+
+/* ========== 目标派生数据 ========== */
+function goalRecords(gid){ return state.records.filter(r=>r.goalId===gid).sort((a,b)=>a.date.localeCompare(b.date)); }
+function goalDoneAmount(gid){ return goalRecords(gid).reduce((s,r)=>s+(Number(r.amount)||0),0); }
+function goalDoneOn(gid, date){ // 指定日期的累计完成量（isMakeup按真实日期算）
+  return goalRecords(gid).filter(r=>r.date===date).reduce((s,r)=>s+(Number(r.amount)||0),0);
+}
+
+/* ========== 核心算法 ========== */
+
+/**
+ * 计算目标在计划执行日的连续打卡次数
+ * 规则：计划外日期不参与统计；当天尚未打卡不算漏打；每周允许 1 次计划内漏打豁免。
+ */
+function computeStreak(goalId){
+  const goal = state.goals.find(g=>g.id===goalId);
+  if(!goal) return {streak:0, restUsed:null};
+  const created = goal.createdAt.slice(0,10);
+  let cur = todayStr();
+  const weekRestUsed = {}; // key: weekStartStr -> 0/1
+  let streak = 0;
+  let lastBreakReason = null;
+  let safety = 4000;
+  while(safety-- > 0){
+    if(diffDays(cur, created) < 0) break; // 目标创建前不统计
+    if(!isGoalScheduledOn(goal, cur)){
+      cur = addDaysStr(cur, -1);
+      continue;
+    }
+    const done = goalDoneOn(goalId, cur) > 0;
+    if(cur === todayStr() && !done){
+      cur = addDaysStr(cur, -1);
+      continue;
+    }
+    if(done){
+      streak++;
+    }else{
+      const ws = weekStart(cur);
+      const used = weekRestUsed[ws] || 0;
+      if(used === 0){
+        weekRestUsed[ws] = 1;
+      }else{
+        lastBreakReason = 'double_miss_in_week';
+        break;
+      }
+    }
+    cur = addDaysStr(cur, -1);
+  }
+  return {streak, lastBreakReason};
+}
+
+/**
+ * 推算完成日期
+ * 基于近 7 天平均速度；样本不足（目标建立不足7天或7天内完成量=0）返回 null
+ */
+function computeEta(goalId){
+  const goal = state.goals.find(g=>g.id===goalId);
+  if(!goal) return null;
+  const created = goal.createdAt.slice(0,10);
+  const today = todayStr();
+  const ageDays = diffDays(today, created) + 1;
+  if(ageDays < 7) return {state:'too_young', message:'暂无推算'};
+  const s7 = addDaysStr(today, -6);
+  let s7Sum = 0; let s7DaysWithRecord = 0;
+  for(let i=0;i<7;i++){
+    const d = addDaysStr(s7, i);
+    const v = goalDoneOn(goalId, d);
+    if(v > 0){ s7Sum += v; s7DaysWithRecord++; }
+  }
+  if(s7DaysWithRecord < 3) return {state:'sparse', message:'暂无推算'};
+  const avg = s7Sum / 7;
+  const done = goalDoneAmount(goalId);
+  const remain = Math.max(0, goal.total - done);
+  if(avg <= 0) return {state:'stopped', message:'暂无推算'};
+  const needed = Math.ceil(remain / avg);
+  const etaDate = addDaysStr(today, needed);
+  let compare = null;
+  if(goal.deadline){
+    const d = diffDays(etaDate, goal.deadline);
+    if(d < 0) compare = {kind:'ahead', days: -d, text:`提前 ${-d} 天`};
+    else if(d > 0) compare = {kind:'behind', days: d, text:`拖后 ${d} 天`};
+    else compare = {kind:'ontime', days:0, text:'按时完成'};
+  }
+  return {state:'ok', etaDate, avg, needed, compare, remain};
+}
+
+/**
+ * 今日建议完成量 = 剩余量 / 剩余计划执行日数
+ * - 未设截止日：用总量 / 30 作为兜底建议（至少 1）
+ * - 已逾期：剩余量 / 1 = 剩余量（但总量可能很小，至少 1）
+ * - 已完成目标：0
+ */
+function suggestToday(goalId){
+  const g = state.goals.find(x=>x.id===goalId);
+  if(!g) return 1;
+  const done = goalDoneAmount(goalId);
+  const remain = Math.max(0, g.total - done);
+  if(remain <= 0) return 0;
+  const today = todayStr();
+  if(g.deadline){
+    const scheduledDays = Math.max(1, countScheduledDays(g, today, g.deadline));
+    return Math.max(1, Math.ceil(remain / scheduledDays));
+  }
+  return Math.max(1, Math.ceil(remain / 30));
+}
+
+/* 今日目标分类：只显示今天计划执行的目标；计划内漏打置顶；已完成目标放最后 */
+function buildTodayGoals(){
+  const today = todayStr();
+  const yesterday = addDaysStr(today, -1);
+  const list = [];
+  for(const g of state.goals){
+    const done = goalDoneAmount(g.id);
+    const completed = done >= g.total;
+    if(!isGoalScheduledOn(g, today)) continue;
+    const overdue = !!g.deadline && diffDays(today, g.deadline) > 0 && !completed;
+    const yesterdayDone = goalDoneOn(g.id, yesterday) > 0;
+    const createdBeforeOrOnYesterday = diffDays(yesterday, g.createdAt.slice(0,10)) >= 0;
+    const missYesterday = createdBeforeOrOnYesterday && isGoalScheduledOn(g, yesterday) && !yesterdayDone && !completed;
+    const ws = weekStart(today);
+    // 卡型：overdue-card / miss-card（第二次计划内漏打）/ rest-card（第一次漏打豁免）/ 普通
+    let type = 'normal';
+    if(overdue) type = 'overdue';
+    else if(!completed){
+      // 只统计今天之前、本周计划执行日的漏打；今天尚未完成不算漏打
+      let missCount = 0;
+      for(let i=0;i<7;i++){
+        const d = addDaysStr(ws, i);
+        if(diffDays(d, today)>=0) break;
+        if(!isGoalScheduledOn(g, d)) continue;
+        const recs = state.records.filter(r=>r.goalId===g.id && r.date===d);
+        const hasRealRecord = recs.some(r=>Number(r.amount)>0);
+        if(!hasRealRecord){ missCount++; }
+      }
+      if(missCount >= 2) type = 'miss';
+      else if(missCount === 1) type = 'rest';
+    }
+    list.push({
+      goal:g, doneAmount:done, completed, overdue, missYesterday,
+      type,
+    });
+  }
+  list.sort((a,b)=>{
+    // 1. 已完成最后
+    if(a.completed !== b.completed) return a.completed?1:-1;
+    // 2. missYesterday 置顶
+    if(a.missYesterday !== b.missYesterday) return a.missYesterday?-1:1;
+    // 3. 按逾期/漏打/正常排
+    const score = t => t==='overdue'?0: t==='miss'?1: t==='rest'?2:3;
+    if(score(a.type)!==score(b.type)) return score(a.type)-score(b.type);
+    // 4. 按截止日近优先
+    const ad = a.goal.deadline ? a.goal.deadline : '9999-12-31';
+    const bd = b.goal.deadline ? b.goal.deadline : '9999-12-31';
+    return ad.localeCompare(bd);
+  });
+  return list;
+}
+
+/* ========== 目标编辑模态 ========== */
+function openGoalModal(editGoal){
+  const isEdit = !!editGoal;
+  const g = normalizeGoalSchedule(editGoal || {
+    color:COLOR_PALETTE[0].bg, total:500, unit:'个', deadline:'',
+    obstacle:'', strategy:'', scheduleType:'daily', repeatDays:[...ALL_WEEKDAYS]
+  });
+  const weekdayHTML = WEEKDAY_NAMES.map((name,i)=>{
+    const day = i + 1;
+    return `<label class="weekday-option">
+      <input type="checkbox" name="repeatDay" value="${day}" ${g.repeatDays.includes(day)?'checked':''}>
+      <span>${name}</span>
+    </label>`;
+  }).join('');
+  const colorHTML = COLOR_PALETTE.map(c=>`<label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;padding:6px 10px;border-radius:10px;border:1px solid var(--border);${g.color===c.bg?'outline:2px solid var(--primary)':''}">
+      <input type="radio" name="goalcolor" value="${c.bg}" ${g.color===c.bg?'checked':''} style="accent-color:${c.bg}">
+      <span style="width:14px;height:14px;border-radius:50%;background:${c.bg}"></span>
+      <span style="font-size:12px">${c.name}</span>
+    </label>`).join('');
+  const m = modal({
+    title: isEdit ? '编辑目标' : '新建学习目标',
+    width: '560px',
+    bodyHTML: `
+      <div class="field">
+        <label>目标名称 <span style="color:var(--danger)">*</span></label>
+        <input type="text" id="f-name" placeholder="例如：背完 2000 个英语单词" value="${g.name||''}">
+      </div>
+      <div class="field-row">
+        <div class="field"><label>计量单位 <span style="color:var(--danger)">*</span></label>
+          <input type="text" id="f-unit" placeholder="个/页/节..." value="${g.unit||''}"></div>
+        <div class="field"><label>总量 <span style="color:var(--danger)">*</span></label>
+          <input type="number" id="f-total" min="1" placeholder="2000" value="${g.total||''}"></div>
+      </div>
+      <div class="field">
+        <label>截止日期 ${isEdit?'（留空表示无截止）':'<span style="color:var(--text-sec);font-weight:400">（留空表示无截止）</span>'}</label>
+        <input type="date" id="f-deadline" value="${g.deadline||''}">
+      </div>
+      <div class="field">
+        <label>执行周期</label>
+        <div class="schedule-modes">
+          <label class="schedule-mode">
+            <input type="radio" name="scheduleType" value="daily" ${g.scheduleType==='daily'?'checked':''}>
+            <span>每天</span>
+          </label>
+          <label class="schedule-mode">
+            <input type="radio" name="scheduleType" value="weekdays" ${g.scheduleType==='weekdays'?'checked':''}>
+            <span>工作日</span>
+          </label>
+          <label class="schedule-mode">
+            <input type="radio" name="scheduleType" value="custom" ${g.scheduleType==='custom'?'checked':''}>
+            <span>自定义</span>
+          </label>
+        </div>
+        <div id="f-custom-days" class="weekday-picker">${weekdayHTML}</div>
+        <span class="hint">计划外日期不会进入今日待办，也不会影响连续打卡。</span>
+      </div>
+      <div class="field">
+        <label>配色方案</label>
+        <div id="f-colors" style="display:flex;flex-wrap:wrap;gap:8px">${colorHTML}</div>
+      </div>
+      <div class="field">
+        <label>最容易遇到的障碍（选填）</label>
+        <textarea id="f-obstacle" placeholder="例如：下班回家后总是先看手机，半小时就过去了">${g.obstacle||''}</textarea>
+      </div>
+      <div class="field">
+        <label>对应的应对策略（选填）</label>
+        <textarea id="f-strategy" placeholder="例如：到家先把手机放客厅充电，换上跑鞋出门走 10 分钟，回来立刻学习">${g.strategy||''}</textarea>
+      </div>
+    `,
+    footer: `
+      <button class="btn btn-outline" data-cancel>取消</button>
+      <button class="btn btn-primary" data-save>${isEdit?'保存修改':'创建目标'}</button>
+    `,
+    onMount(body, close){
+      body.parentElement.querySelector('[data-cancel]').onclick = close;
+      const customDays = document.getElementById('f-custom-days');
+      const syncScheduleUI = ()=>{
+        const selected = body.querySelector('input[name="scheduleType"]:checked');
+        customDays.style.display = selected && selected.value === 'custom' ? 'flex' : 'none';
+      };
+      body.querySelectorAll('input[name="scheduleType"]').forEach(el=>el.addEventListener('change', syncScheduleUI));
+      syncScheduleUI();
+      body.parentElement.querySelector('[data-save]').onclick = ()=>{
+        const name = document.getElementById('f-name').value.trim();
+        const unit = document.getElementById('f-unit').value.trim();
+        const total = Math.floor(Number(document.getElementById('f-total').value));
+        const deadline = document.getElementById('f-deadline').value || '';
+        const scheduleType = (body.querySelector('input[name="scheduleType"]:checked') || {}).value || 'daily';
+        const customRepeatDays = [...body.querySelectorAll('input[name="repeatDay"]:checked')].map(el=>Number(el.value));
+        const repeatDays = scheduleType === 'daily'
+          ? [...ALL_WEEKDAYS]
+          : scheduleType === 'weekdays' ? [...WORK_WEEKDAYS] : customRepeatDays;
+        const color = (body.querySelector('input[name="goalcolor"]:checked') || {}).value || COLOR_PALETTE[0].bg;
+        const obstacle = document.getElementById('f-obstacle').value.trim();
+        const strategy = document.getElementById('f-strategy').value.trim();
+        if(!name){ toast('请填写目标名称','error'); return; }
+        if(!unit){ toast('请填写计量单位','error'); return; }
+        if(!(total>0)){ toast('总量必须是正整数','error'); return; }
+        if(scheduleType === 'custom' && repeatDays.length === 0){ toast('请至少选择一个执行日','error'); return; }
+        if(deadline){
+          if(diffDays(deadline, todayStr())<0){ toast('截止日期不能在过去','error'); return; }
+        }
+        if(isEdit){
+          Object.assign(editGoal, {name, unit, total, deadline, scheduleType, repeatDays, color, obstacle, strategy});
+          toast('已保存修改', 'success');
+        }else{
+          state.goals.push({
+            id:uid(), name, unit, total, deadline, scheduleType, repeatDays,
+            color, obstacle, strategy, createdAt: new Date().toISOString()
+          });
+          toast('目标已创建', 'success');
+        }
+        saveAll(); close(); render();
+      };
+    }
+  });
+}
+
+/* ========== 打卡模态（可用于即时打卡 + 补记）============ */
+function openCheckinModal(goalId, opts={}){
+  const g = state.goals.find(x=>x.id===goalId); if(!g) return;
+  const suggest = suggestToday(goalId);
+  // 可补记的最近 6 天（today-6 ~ today-1） + 今日
+  const today = todayStr();
+  const dateChoices = [{v:today, t:'今日 '+today}];
+  for(let i=1;i<=6;i++){
+    const d = addDaysStr(today, -i);
+    dateChoices.push({v:d, t:`补记 ${d}（${['周一','周二','周三','周四','周五','周六','周日'][isoWeekday(d)-1]}）`});
+  }
+  const defaultDate = opts.forDate || today;
+  const done = goalDoneAmount(goalId);
+  const remain = Math.max(0, g.total - done);
+  const isMakeup = defaultDate !== today;
+  const m = modal({
+    title: `${isMakeup?'补记打卡':'打卡'}：${g.name}`,
+    width: '500px',
+    bodyHTML: `
+      <div class="field">
+        <label>日期</label>
+        <select id="c-date">
+          ${dateChoices.map(dc=>`<option value="${dc.v}" ${dc.v===defaultDate?'selected':''}>${dc.t}</option>`).join('')}
+        </select>
+        <span class="hint">支持补记最近 6 天的打卡记录</span>
+      </div>
+      <div class="field">
+        <label>本次完成数量（单位：${g.unit}）</label>
+        <div class="amount-input" style="width:100%">
+          <input type="number" id="c-amount" min="1" max="${remain||''}" value="${isMakeup?1:suggest}">
+          <div class="unit">${g.unit}</div>
+        </div>
+        <span class="hint">系统建议今日完成 ${suggest} ${g.unit}（剩余 ${remain}${g.unit} ÷ 剩余天数）。可自由修改。</span>
+      </div>
+      <div class="field">
+        <label>投入分钟数（选填）</label>
+        <div class="minute-chip"><input type="number" id="c-min" min="0" placeholder="0"> <span>分钟</span></div>
+      </div>
+      <div class="field">
+        <label>备注（选填）</label>
+        <textarea id="c-note" placeholder="今天学了什么、有什么心得..."></textarea>
+      </div>
+    `,
+    footer: `
+      <button class="btn btn-outline" data-cancel>取消</button>
+      <button class="btn btn-primary" data-save>${isMakeup?'确认补记':'确认打卡'}</button>
+    `,
+    onMount(body, close){
+      body.parentElement.querySelector('[data-cancel]').onclick = close;
+      body.parentElement.querySelector('[data-save]').onclick = ()=>{
+        const date = document.getElementById('c-date').value;
+        const amount = Math.max(0, Math.floor(Number(document.getElementById('c-amount').value)||0));
+        const minutes = Math.max(0, Math.floor(Number(document.getElementById('c-min').value)||0));
+        const note = document.getElementById('c-note').value.trim();
+        if(!(amount>0)){ toast('完成数量必须大于 0','error'); return; }
+        if(amount > remain && date === today){
+          // 超过剩余：允许，但给出提醒（目标会显示超额完成）
+        }
+        state.records.push({
+          id: uid(), goalId, date, amount, minutes,
+          isMakeup: date !== today,
+          isRestDay: false, note,
+        });
+        saveAll();
+        toast(date===today?'打卡成功 🎉':'补记成功','success');
+        close();
+        // 达成检测
+        const newDone = goalDoneAmount(goalId);
+        if(newDone >= g.total){
+          const wasDone = done >= g.total;
+          if(!wasDone) launchConfetti();
+        }
+        render();
+      };
+    }
+  });
+}
+
+/* 删除打卡记录 */
+function deleteRecord(recId){
+  confirmModal({
+    title:'删除打卡记录',
+    message:'该记录将被永久删除，进度会回滚。确定吗？',
+    confirmText:'删除', danger:true,
+    onConfirm(){
+      const i = state.records.findIndex(r=>r.id===recId);
+      if(i>=0){ state.records.splice(i,1); saveAll(); toast('记录已删除','success'); render(); }
+    }
+  });
+}
+
+/* 删除目标 */
+function deleteGoal(gid){
+  const g = state.goals.find(x=>x.id===gid); if(!g) return;
+  confirmModal({
+    title:'删除目标',
+    message:`将同时删除与「${g.name}」相关的所有打卡记录。请在下方输入「${g.name}」进行二次确认：<br>
+             <input type="text" id="delConfirm" style="margin-top:8px;width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:10px;outline:none" placeholder="请输入目标名称">`,
+    confirmText:'确认删除', danger:true,
+    onConfirm(){
+      const m = modal({title:'二次确认', bodyHTML:'<p>请输入目标名称以确认删除。</p>', footer:'<button class="btn btn-outline" data-c>关闭</button>', onMount(b,close){
+        b.parentElement.querySelector('[data-c]').onclick = close;
+      }});
+      // 简化：直接取 confirmModal 内输入（注：confirmModal已关闭，这里单独开一个二次确认窗）
+    }
+  });
+}
+
+/* 正确的删除流程（上面的实现有误，这里重写一个正确版本） */
+function removeGoal(gid){
+  const g = state.goals.find(x=>x.id===gid); if(!g) return;
+  modal({
+    title:'删除目标',
+    bodyHTML: `
+      <p style="line-height:1.7;color:#374151">
+        将永久删除「<strong style="color:var(--danger)">${g.name}</strong>」及其所有打卡记录，此操作不可恢复。<br><br>
+        请在下方输入目标名称以确认：
+      </p>
+      <input type="text" id="rg-name" placeholder="请输入：${g.name}" style="margin-top:6px;width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:10px;outline:none">
+    `,
+    footer: `<button class="btn btn-outline" data-cancel>取消</button>
+             <button class="btn btn-danger" data-ok>确认删除</button>`,
+    onMount(body, close){
+      body.parentElement.querySelector('[data-cancel]').onclick = close;
+      body.parentElement.querySelector('[data-ok]').onclick = ()=>{
+        const val = document.getElementById('rg-name').value.trim();
+        if(val !== g.name){ toast('名称不匹配','error'); return; }
+        state.goals = state.goals.filter(x=>x.id!==gid);
+        state.records = state.records.filter(r=>r.goalId!==gid);
+        saveAll(); close(); toast('目标已删除','success'); render();
+      };
+    }
+  });
+}
+
+/* 调整计划：仅打开编辑目标对话框（改名/改总量/改截止日） */
+function adjustGoal(gid){ openGoalModal(state.goals.find(x=>x.id===gid)); }
+
+/* 彩带 */
+function launchConfetti(){
+  const root = document.getElementById('confettiRoot');
+  const colors = ['#7C3AED','#A855F7','#2563EB','#10B981','#F59E0B','#EF4444','#0891B2'];
+  for(let i=0;i<80;i++){
+    const el = document.createElement('div');
+    el.className = 'confetti';
+    el.style.left = Math.random()*100 + '%';
+    el.style.background = colors[i%colors.length];
+    el.style.animationDelay = (Math.random()*0.6).toFixed(2)+'s';
+    el.style.animationDuration = (2.2 + Math.random()*1.6).toFixed(2)+'s';
+    root.appendChild(el);
+    setTimeout(()=>el.remove(), 4200);
+  }
+}
+
+/* ========== 今日 Tab 渲染 ========== */
+function renderToday(){
+  const box = document.getElementById('tab-today');
+  const today = todayStr();
+  const items = buildTodayGoals();
+
+  let inner = `
+    <button class="hero-create" onclick="openGoalModal()">
+      ${svgi('PLUS')} 新建学习目标
+    </button>
+    <div class="pomo-setup">
+      <label>🍅 番茄钟时长</label>
+      <input type="number" min="1" max="180" value="${state.pomodoro.workMinutes}" onchange="setPomoWorkMinutes(this.value)">
+      <span class="hint">分钟（默认 25）</span>
+      <span class="hint" style="margin-left:auto">专注完成后自动记录到目标</span>
+    </div>
+    <div class="page-header">
+      <div class="page-title">今日待办</div>
+      <div class="hint">${today}</div>
+    </div>`;
+
+  if(items.length === 0){
+    const hasGoals = state.goals.length > 0;
+    inner += `<div class="empty">
+      ${svgi(hasGoals?'TODAY':'GOAL')}
+      <h4>${hasGoals?'今天没有安排目标':'还没有学习目标'}</h4>
+      <p>${hasGoals?'按执行周期休息一天，或去看板查看全部目标':'点击上方「新建学习目标」，开启你的成长旅程'}</p>
+    </div>`;
+  }
+
+  for(const item of items){
+    const g = item.goal;
+    const done = item.doneAmount;
+    const remain = Math.max(0, g.total - done);
+    const pct = clamp(done / g.total * 100, 0, 100);
+    const suggest = item.completed ? 0 : suggestToday(g.id);
+    const streak = computeStreak(g.id).streak;
+    const eta = computeEta(g.id);
+    const overdue = item.overdue;
+    const overdueDays = overdue ? diffDays(today, g.deadline) : 0;
+
+    // 状态徽章
+    let badges = [];
+    if(item.completed) badges.push(`<span class="badge badge-success">${svgi('CHECK')}已达成</span>`);
+    if(overdue) badges.push(`<span class="badge badge-danger">${svgi('WARN')}逾期 ${overdueDays} 天</span>`);
+    if(item.missYesterday && !overdue && !item.completed) badges.push(`<span class="badge badge-danger">昨日未打卡（已计入本周漏打）</span>`);
+    if(item.type==='rest' && !item.missYesterday && !overdue && !item.completed) badges.push(`<span class="badge badge-warn">黄卡 · 本周 1 次漏打已豁免</span>`);
+    if(item.type==='miss' && !overdue && !item.completed) badges.push(`<span class="badge badge-danger">红卡 · 本周第二次漏打，将中断连续</span>`);
+    badges.push(`<span class="badge badge-idle">${goalScheduleLabel(g)}</span>`);
+
+    // 推算状态
+    let etaLine = '';
+    if(eta && eta.state === 'ok'){
+      const cmpCls = eta.compare ? (eta.compare.kind==='ahead'?'badge-success' : eta.compare.kind==='behind'?'badge-danger' : 'badge-idle') : 'badge-idle';
+      const cmpTxt = eta.compare ? eta.compare.text : '';
+      etaLine = `<span class="badge ${cmpCls}">预计 ${eta.etaDate.slice(5)} 完成 · ${cmpTxt}</span>`;
+    }else if(eta){
+      etaLine = `<span class="badge badge-idle">${eta.message}</span>`;
+    }
+
+    // 目标卡片类型
+    const cls = ['goal-card card'];
+    if(item.type==='overdue') cls.push('overdue-card');
+    if(item.type==='miss') cls.push('miss-card');
+    if(item.type==='rest') cls.push('rest-card');
+    if(item.missYesterday && !overdue) cls.push('yesterday-miss');
+
+    inner += `
+      <div class="${cls.join(' ')}" style="--card-color:${g.color}">
+        <div class="card-header">
+          <div style="min-width:0;flex:1">
+            <div class="card-title">
+              <span class="card-dot" style="background:${g.color}"></span>
+              <span class="goal-name" style="color:var(--text)">${g.name}</span>
+            </div>
+            <div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:6px">${badges.join('')}${etaLine}</div>
+            <div class="card-sub" style="margin-top:6px">连续 ${streak} 次 · 截止 ${g.deadline||'不限'}</div>
+          </div>
+          <div class="action-icons">
+            <button class="icon-btn" onclick="openGoalModal(state.goals.find(x=>x.id==='${g.id}'))" title="编辑">${svgi('EDIT')}</button>
+            <button class="icon-btn danger" onclick="removeGoal('${g.id}')" title="删除">${svgi('TRASH')}</button>
+          </div>
+        </div>
+
+        <div class="goal-progress"><div style="width:${pct}%;background:linear-gradient(90deg,${g.color},${g.color}AA)"></div></div>
+        <div class="goal-meta">
+          <span>总量 ${g.total}${g.unit}</span>
+          <span>已完成 ${done}${g.unit} (${(pct).toFixed(0)}%)</span>
+          <span>剩余 ${remain}${g.unit}</span>
+        </div>
+
+        ${(g.obstacle || g.strategy) ? `
+          <div class="plan-box">
+            ${g.obstacle?`<div><strong>⚠️ 障碍：</strong>${g.obstacle}</div>`:''}
+            ${g.strategy?`<div><strong>✅ 对策：</strong>${g.strategy}</div>`:''}
+          </div>`:''}
+
+        <div class="quick-row">
+          ${!item.completed ? `
+            <div class="amount-input">
+              <input type="number" id="q-${g.id}" min="1" value="${suggest}">
+              <div class="unit">${g.unit}</div>
+            </div>
+            <div class="minute-chip" title="投入分钟数（选填）">
+              ${svgi('CLOCK')} <input type="number" id="qm-${g.id}" min="0" placeholder="0"> 分钟
+            </div>
+            <button class="btn btn-primary" onclick="quickCheckin('${g.id}')">今日打卡</button>
+            <button class="btn btn-outline" onclick="startPomodoro('${g.id}')" title="用番茄钟专注此目标">🍅 专注</button>
+            <button class="btn btn-outline" onclick="openCheckinModal('${g.id}',{history:true})">补记</button>
+          ` : `
+            <button class="btn btn-success" disabled>🎉 已达成</button>
+            <button class="btn btn-outline" onclick="openCheckinModal('${g.id}')">追加记录</button>
+          `}
+        </div>
+
+        ${overdue ? `
+          <div class="overdue-footer">
+            <span>⚠️ 目标已逾期 ${overdueDays} 天，建议立即打卡或调整计划</span>
+            <span>
+              <button class="btn btn-primary" style="padding:6px 10px;font-size:12px" onclick="openCheckinModal('${g.id}')">立即打卡</button>
+              <button class="btn btn-outline" style="padding:6px 10px;font-size:12px" onclick="adjustGoal('${g.id}')">调整计划</button>
+            </span>
+          </div>
+        `:''}
+      </div>
+    `;
+  }
+
+  inner += `
+    <div class="bottom-create">
+      <p>🎯 想开始新的挑战？设置一个明确的终点和总量，更容易坚持！</p>
+      <button class="btn btn-primary" onclick="openGoalModal()">${svgi('PLUS')} 新建目标</button>
+    </div>
+  `;
+
+  box.innerHTML = inner;
+}
+
+/* 快速打卡（今日卡片内） */
+function quickCheckin(gid){
+  const amtEl = document.getElementById('q-'+gid);
+  const minEl = document.getElementById('qm-'+gid);
+  const amount = Math.max(0, Math.floor(Number(amtEl && amtEl.value) || 0));
+  const minutes = Math.max(0, Math.floor(Number(minEl && minEl.value) || 0));
+  if(!(amount>0)){ toast('完成数量必须大于 0','error'); return; }
+  const g = state.goals.find(x=>x.id===gid);
+  const done = goalDoneAmount(gid);
+  state.records.push({
+    id:uid(), goalId:gid, date:todayStr(), amount, minutes, isMakeup:false, isRestDay:false, note:'',
+  });
+  saveAll(); toast('打卡成功 🎉','success');
+  const newDone = goalDoneAmount(gid);
+  if(newDone >= g.total && done < g.total) launchConfetti();
+  render();
+}
+
+/* ========== 番茄钟核心 ========== */
+function startPomodoro(goalId){
+  const g = state.goals.find(x=>x.id===goalId);
+  if(!g){ toast('目标不存在','error'); return; }
+  const p = state.pomodoro;
+  p.phase = 'working';
+  p.total = p.workMinutes * 60;
+  p.remaining = p.total;
+  p.currentGoalId = goalId;
+  p.goalTitle = g.name;
+  saveAll();
+  startPomoTick();
+  renderPomodoroBar();
+  toast(`🍅 番茄钟启动：专注「${g.name}」${p.workMinutes} 分钟`,'success');
+}
+function startBreak(){
+  const p = state.pomodoro;
+  p.phase = 'break';
+  p.total = p.breakMinutes * 60;
+  p.remaining = p.total;
+  p.currentGoalId = null;
+  p.goalTitle = '休息';
+  startPomoTick();
+  renderPomodoroBar();
+}
+function pausePomodoro(){
+  const p = state.pomodoro;
+  if(p.phase === 'working' || p.phase === 'break'){
+    p.phase = 'paused';
+    if(pomoTimer){ clearInterval(pomoTimer); pomoTimer = null; }
+    renderPomodoroBar();
+  }else if(p.phase === 'paused'){
+    // 恢复
+    p.phase = p.remaining > 0 && p.currentGoalId ? 'working' : 'break';
+    startPomoTick();
+    renderPomodoroBar();
+  }
+}
+function stopPomodoro(){
+  const p = state.pomodoro;
+  p.phase = 'idle';
+  p.remaining = 0;
+  p.total = 0;
+  p.currentGoalId = null;
+  p.goalTitle = '';
+  if(pomoTimer){ clearInterval(pomoTimer); pomoTimer = null; }
+  renderPomodoroBar();
+}
+function startPomoTick(){
+  if(pomoTimer){ clearInterval(pomoTimer); }
+  pomoTimer = setInterval(()=>{
+    const p = state.pomodoro;
+    p.remaining--;
+    if(p.remaining <= 0){
+      // 番茄钟完成
+      clearInterval(pomoTimer); pomoTimer = null;
+      onPomodoroComplete();
+    }
+    renderPomodoroBar();
+  }, 1000);
+}
+function onPomodoroComplete(){
+  const p = state.pomodoro;
+  const wasWork = p.phase === 'working';
+  const workMin = p.total > 0 ? Math.round(p.total / 60) : p.workMinutes;
+
+  if(wasWork && p.currentGoalId){
+    // 自动打卡：记录专注时长到当前目标，打卡量=1（表示完成一次专注session）
+    const gid = p.currentGoalId;
+    const g = state.goals.find(x=>x.id===gid);
+    const done = goalDoneAmount(gid);
+    state.records.push({
+      id:uid(), goalId:gid, date:todayStr(),
+      amount:1, minutes:workMin,
+      isMakeup:false, isRestDay:false,
+      note:`🍅 番茄钟专注 ${workMin} 分钟`,
+    });
+    saveAll();
+    toast(`🍅 专注完成！已记录 ${workMin} 分钟到「${p.goalTitle}」`,'success');
+    const newDone = goalDoneAmount(gid);
+    if(g && newDone >= g.total && done < g.total) launchConfetti();
+    render();
+    // 询问是否休息
+    setTimeout(()=>{
+      if(confirm('专注完成！是否开始休息？')){
+        startBreak();
+      }else{
+        stopPomodoro();
+      }
+    }, 200);
+  }else if(wasWork){
+    toast(`🍅 专注完成（${workMin} 分钟）`,'success');
+    stopPomodoro();
+  }else{
+    // 休息完成
+    toast('☕ 休息结束，可以开始下一轮了','success');
+    stopPomodoro();
+  }
+}
+function setPomoWorkMinutes(v){
+  v = clamp(Math.floor(Number(v)||25), 1, 180);
+  state.pomodoro.workMinutes = v;
+  saveAll();
+  // 如果空闲，更新浮动条显示
+  if(state.pomodoro.phase === 'idle'){
+    renderPomodoroBar();
+  }
+}
+function pomoFormatTime(s){
+  const m = Math.floor(s/60);
+  const sec = s%60;
+  return pad(m)+':'+pad(sec);
+}
+function pomoPhaseLabel(){
+  const p = state.pomodoro;
+  if(p.phase==='working') return '专注中';
+  if(p.phase==='break') return '休息中';
+  if(p.phase==='paused') return '已暂停';
+  return '空闲';
+}
+function pomoPhaseColor(){
+  const p = state.pomodoro;
+  if(p.phase==='working') return '#F97316';
+  if(p.phase==='break') return '#10B981';
+  if(p.phase==='paused') return '#6B7280';
+  return '#7C3AED';
+}
+
+/* ========== 番茄钟浮动条渲染 ========== */
+function renderPomodoroBar(){
+  const bar = document.getElementById('pomoBar');
+  if(!bar) return;
+  const p = state.pomodoro;
+  if(p.phase === 'idle'){
+    bar.style.display = 'none';
+    return;
+  }
+  bar.style.display = 'flex';
+  const color = pomoPhaseColor();
+  const label = pomoPhaseLabel();
+  const time = pomoFormatTime(p.remaining);
+  const progress = p.total > 0 ? clamp((1 - p.remaining/p.total)*100, 0, 100) : 0;
+  const pauseBtnText = p.phase === 'paused' ? '继续' : '暂停';
+  const goalPart = p.currentGoalId ? ` · ${p.goalTitle}` : '';
+  bar.innerHTML = `
+    <div class="pomo-info" style="color:${color}">
+      <span class="pomo-phase">${label}${goalPart}</span>
+      <span class="pomo-time" style="background:${color}">${time}</span>
+    </div>
+    <div class="pomo-progress"><div style="width:${progress}%;background:${color}"></div></div>
+    <div class="pomo-actions">
+      <button class="btn btn-outline" style="padding:5px 12px;font-size:12px" onclick="pausePomodoro()">${pauseBtnText}</button>
+      <button class="btn btn-danger" style="padding:5px 12px;font-size:12px" onclick="stopPomodoro()">停止</button>
+    </div>
+  `;
+}
+
+
+/* ========== 进度环 SVG（80px） ========== */
+function ringSVG(color, pct, text){
+  pct = clamp(pct, 0, 100);
+  const R = 36; const C = 2 * Math.PI * R;
+  const off = C * (1 - pct/100);
+  return `<div class="ring">
+    <svg width="80" height="80" viewBox="0 0 80 80">
+      <circle class="ring-bg" cx="40" cy="40" r="${R}"/>
+      <circle class="ring-fg" cx="40" cy="40" r="${R}" stroke="${color}"
+              stroke-dasharray="${C.toFixed(2)}" stroke-dashoffset="${off.toFixed(2)}"/>
+    </svg>
+    <div class="ring-text" style="color:${color}">${text}</div>
+  </div>`;
+}
+
+/* ========== 看板 Tab 渲染 ========== */
+function renderKanban(){
+  const box = document.getElementById('tab-kanban');
+  if(state.goals.length === 0){
+    box.innerHTML = `
+      <div class="page-header"><div class="page-title">看板</div></div>
+      <div class="empty">
+        ${svgi('KANBAN')}
+        <h4>暂无目标数据</h4>
+        <p>先在「今日」页新建第一个学习目标</p>
+      </div>`;
+    return;
+  }
+
+  let html = `<div class="page-header"><div class="page-title">看板总览</div>
+              <div class="hint">共 ${state.goals.length} 个目标，全部打卡记录 ${state.records.length} 条</div></div>`;
+
+  // 14天投入分钟数柱状图（堆叠）
+  html += renderMinutesChartHTML();
+
+  html += `<div class="page-header" style="margin-top:20px"><div class="page-title">目标详情</div></div>`;
+
+  for(const g of state.goals){
+    const done = goalDoneAmount(g.id);
+    const remain = Math.max(0, g.total - done);
+    const pct = clamp(done/g.total*100, 0, 100);
+    const streak = computeStreak(g.id).streak;
+    const eta = computeEta(g.id);
+    const pctText = (pct).toFixed(0) + '%';
+
+    // 最近10条记录
+    const recs = state.records.filter(r=>r.goalId===g.id).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,10);
+    const recsHTML = recs.length ? recs.map(r=>{
+      const makeup = r.isMakeup ? `<span class="badge badge-makeup">补</span>` : '';
+      const rest = r.isRestDay ? `<span class="badge badge-warn">休息</span>` : '';
+      const minPart = r.minutes>0 ? `<span class="rec-min">· ${r.minutes} 分钟</span>` : '';
+      const amtPart = `<span class="rec-amount">${r.amount}${g.unit}</span>`;
+      return `<div class="rec-item">
+        <div class="rec-left">
+          <span class="rec-date">${r.date.slice(5)}</span>
+          ${makeup}${rest}
+          ${amtPart}
+          ${minPart}
+          ${r.note ? `<span style="color:var(--text-sec);font-size:12px">— ${r.note}</span>`:''}
+        </div>
+        <button class="icon-btn danger" onclick="deleteRecord('${r.id}')" title="删除记录">${svgi('TRASH')}</button>
+      </div>`;
+    }).join('') : `<div style="padding:8px 4px;color:var(--text-sec);font-size:12px">暂无记录，去「今日」页打卡吧！</div>`;
+
+    // 推算
+    let etaBox = '';
+    if(eta && eta.state === 'ok'){
+      const cmp = eta.compare || {kind:'flat', text:'按时完成'};
+      const cmpCls = cmp.kind==='ahead'?'delta-up' : cmp.kind==='behind'?'delta-down':'delta-flat';
+      etaBox = `<div class="hint" style="margin-top:8px">
+                  近7天日均 ${eta.avg.toFixed(1)}${g.unit} · 预计 ${eta.etaDate} 完成 ·
+                  <span class="${cmpCls}">${cmp.text}</span>
+                </div>`;
+    }else if(eta){
+      etaBox = `<div class="hint" style="margin-top:8px">预测：${eta.message}</div>`;
+    }
+
+    html += `
+      <div class="card kanban-card" style="border-left:4px solid ${g.color}">
+        <div class="card-header">
+          <div style="min-width:0;flex:1">
+            <div class="card-title">
+              <span class="card-dot" style="background:${g.color}"></span>
+              <span style="font-size:16px">${g.name}</span>
+              <span class="badge badge-primary">连续 ${streak} 次</span>
+              <span class="badge badge-idle">${goalScheduleLabel(g)}</span>
+            </div>
+            <div class="card-sub">单位：${g.unit} · 截止：${g.deadline||'不限'}</div>
+          </div>
+          <div class="action-icons">
+            <button class="icon-btn" onclick="openGoalModal(state.goals.find(x=>x.id==='${g.id}'))">${svgi('EDIT')}</button>
+            <button class="icon-btn danger" onclick="removeGoal('${g.id}')">${svgi('TRASH')}</button>
+          </div>
+        </div>
+
+        <div class="ring-row">
+          ${ringSVG(g.color, pct, pctText)}
+          <div class="ring-stat-box">
+            <div class="ring-triplet">
+              <div><div class="n">${g.total}</div><div class="l">总量 (${g.unit})</div></div>
+              <div><div class="n">${done}</div><div class="l">已完成</div></div>
+              <div><div class="n">${remain}</div><div class="l">剩余</div></div>
+            </div>
+            ${etaBox}
+          </div>
+        </div>
+
+        ${(g.obstacle || g.strategy) ? `
+          <div class="plan-box">
+            ${g.obstacle?`<div><strong>⚠️ 障碍：</strong>${g.obstacle}</div>`:''}
+            ${g.strategy?`<div><strong>✅ 对策：</strong>${g.strategy}</div>`:''}
+          </div>`:''}
+
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px">
+          <h4 style="font-size:13px;font-weight:700">最近 10 条打卡记录</h4>
+          <button class="btn btn-outline" style="padding:5px 10px;font-size:12px" onclick="openCheckinModal('${g.id}')">新增记录</button>
+        </div>
+        <div class="records-list">${recsHTML}</div>
+      </div>
+    `;
+  }
+
+  box.innerHTML = html;
+}
+
+/* 近14天 投入分钟数 分目标堆叠柱状图 */
+function renderMinutesChartHTML(){
+  const today = todayStr();
+  const days = []; // [{date, [perGoalMin]}]
+  for(let i=13;i>=0;i--){
+    const d = addDaysStr(today, -i);
+    const perGoal = {};
+    let total = 0;
+    for(const g of state.goals){
+      const recs = state.records.filter(r=>r.goalId===g.id && r.date===d);
+      const m = recs.reduce((s,r)=>s + (Number(r.minutes)||0), 0);
+      if(m>0){ perGoal[g.id] = m; total += m; }
+    }
+    days.push({date:d, perGoal, total, iso:isoWeekday(d)});
+  }
+  const maxMin = Math.max(1, ...days.map(d=>d.total));
+  const barH = 100;     // 柱最大高度
+  const n = days.length;
+  const w = 100, gap = 1.2;  // 百分比坐标
+  const bw = (w - gap*(n+1)) / n;
+
+  let rects = '';
+  for(let i=0;i<n;i++){
+    const day = days[i];
+    const x = gap + i*(bw + gap);
+    let yAccum = 0;
+    // 按目标id排序确保稳定堆叠
+    const entries = Object.entries(day.perGoal).sort((a,b)=>a[0].localeCompare(b[0]));
+    for(const [gid, min] of entries){
+      const g = state.goals.find(x=>x.id===gid); if(!g) continue;
+      const h = (min / maxMin) * barH;
+      const y = barH - yAccum - h;
+      yAccum += h;
+      rects += `<rect x="${x.toFixed(2)}%" y="${y.toFixed(2)}" width="${bw.toFixed(2)}%" height="${h.toFixed(2)}" fill="${g.color}" rx="2">
+        <title>${day.date} ${g.name} ${min} 分钟</title></rect>`;
+    }
+  }
+  // x 轴标签：用 HTML flex 布局，避免 SVG preserveAspectRatio 拉伸导致文字变形挤压
+  let labelsHtml = '';
+  for(let i=0;i<n;i++){
+    const day = days[i];
+    const mmdd = day.date.slice(5);
+    const weekend = day.iso===6 || day.iso===7;
+    labelsHtml += `<div style="flex:1;text-align:center;font-size:11px;color:${weekend?'#EF4444':'#9CA3AF'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${mmdd}</div>`;
+  }
+  // 图例
+  let legend = '';
+  for(const g of state.goals){
+    legend += `<span style="display:inline-flex;align-items:center;gap:5px;margin-right:14px;font-size:12px;color:var(--text-sec)">
+      <span style="width:10px;height:10px;background:${g.color};border-radius:2px"></span>${g.name}</span>`;
+  }
+
+  const goalsHaveMinutes = state.goals.some(g => state.records.some(r=>r.goalId===g.id && r.minutes>0));
+  if(!goalsHaveMinutes){
+    return `<div class="card">
+      <div class="chart-title">📊 近 14 天投入分钟数（堆叠柱状图）</div>
+      <div style="padding:18px;color:var(--text-sec);font-size:13px;text-align:center">暂无投入分钟数数据<br><span style="font-size:12px">打卡时填写"投入分钟数"，图表将按目标色彩堆叠展示</span></div>
+    </div>`;
+  }
+
+  return `<div class="card">
+    <div class="chart-title">📊 近 14 天投入分钟数（按目标颜色堆叠）</div>
+    <div style="margin-bottom:8px;overflow-x:auto">${legend}</div>
+    <div class="chart-wrap">
+      <svg viewBox="0 0 100 ${barH}" preserveAspectRatio="none" style="width:100%;height:120px;display:block">
+        <!-- 背景网格 -->
+        <line x1="0" y1="${barH}" x2="100%" y2="${barH}" stroke="#E5E7EB" stroke-width="0.3"/>
+        <line x1="0" y1="${barH*0.5}" x2="100%" y2="${barH*0.5}" stroke="#F3F4F6" stroke-width="0.2"/>
+        ${rects}
+      </svg>
+      <div style="display:flex;gap:2px;margin-top:6px">${labelsHtml}</div>
+    </div>
+  </div>`;
+}
+
+/* ========== 周报 Tab 渲染 ========== */
+function renderWeekly(){
+  const box = document.getElementById('tab-weekly');
+  const today = todayStr();
+  if(!state.currentWeekStart) state.currentWeekStart = weekStart(today);
+  const ws = state.currentWeekStart;
+  const prev = addDaysStr(ws, -7);
+  const next = addDaysStr(ws, 7);
+  const nextDisabled = diffDays(next, weekStart(today)) > 0;  // 不能看未来整周
+
+  // 当前周7天
+  const curRange = Array.from({length:7},(_,i)=>addDaysStr(ws, i));
+  const prevRange = Array.from({length:7},(_,i)=>addDaysStr(prev, i));
+
+  // 每目标统计：{ [gid]: {amount, days, minutes} }
+  const sumFor = (range)=>{
+    const byGoal = {}; let totalDays = new Set(); let totalMin = 0;
+    for(const g of state.goals) byGoal[g.id] = {amount:0, days:0, minutes:0, goal:g};
+    for(const r of state.records){
+      if(!byGoal[r.goalId]) continue;
+      if(!range.includes(r.date)) continue;
+      byGoal[r.goalId].amount += Number(r.amount)||0;
+      byGoal[r.goalId].minutes += Number(r.minutes)||0;
+      byGoal[r.goalId].daysSet = byGoal[r.goalId].daysSet || new Set();
+      byGoal[r.goalId].daysSet.add(r.date);
+      totalDays.add(r.date);
+      totalMin += Number(r.minutes)||0;
+    }
+    for(const gid in byGoal) byGoal[gid].days = byGoal[gid].daysSet ? byGoal[gid].daysSet.size : 0;
+    return { byGoal, totalDays: totalDays.size, totalMin };
+  };
+  const cur = sumFor(curRange);
+  const last = sumFor(prevRange);
+
+  // 周报文本内容
+  const curReport = state.reports[ws] || {keep:'', problem:'', try:'', planNext:''};
+
+  // 统计汇总卡
+  const card = (label, cur, delta)=>{
+    let cls='delta-flat', txt='环比持平';
+    if(cur>delta){ cls='delta-up'; txt='↑ 上升'; }
+    else if(cur<delta){ cls='delta-down'; txt='↓ 下降'; }
+    return `<div class="stat-card">
+      <div class="label">${label}</div>
+      <div class="value">${cur}</div>
+      <div class="delta ${cls}">${txt}（上周 ${delta}）</div>
+    </div>`;
+  };
+
+  // 目标明细行
+  let tblRows = '';
+  for(const g of state.goals){
+    const c = cur.byGoal[g.id]; const p = last.byGoal[g.id];
+    tblRows += `<tr>
+      <td><span style="display:inline-flex;align-items:center;gap:6px"><span class="card-dot" style="background:${g.color}"></span>${g.name}</span></td>
+      <td>${c.amount}${g.unit} <span style="color:var(--text-sec)">(${p.amount})</span></td>
+      <td>${c.days} 天 <span style="color:var(--text-sec)">(${p.days})</span></td>
+      <td>${c.minutes} 分 <span style="color:var(--text-sec)">(${p.minutes})</span></td>
+    </tr>`;
+  }
+
+  box.innerHTML = `
+    <div class="week-switch">
+      <button class="icon-btn" onclick="changeWeek(-1)" title="上一周">${svgi('BACK')}</button>
+      <div class="week-title">周报 · ${ws} ~ ${addDaysStr(ws,6)}</div>
+      <button class="icon-btn" ${nextDisabled?'disabled style="opacity:.3;cursor:not-allowed"':''} onclick="changeWeek(1)" title="下一周">${svgi('FORWARD')}</button>
+    </div>
+
+    <div class="compare-summary">
+      ${card('打卡天数', cur.totalDays, last.totalDays)}
+      ${card('投入分钟数', cur.totalMin, last.totalMin)}
+      ${card('目标数', state.goals.length, state.goals.length)}
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="margin-bottom:8px">📋 各目标本周投入（上周同口径括号内）</div>
+      <div style="overflow-x:auto">
+        <table class="goal-week-table">
+          <thead><tr><th>目标</th><th>完成量</th><th>打卡天数</th><th>投入分钟</th></tr></thead>
+          <tbody>${tblRows || `<tr><td colspan="4" style="text-align:center;color:var(--text-sec);padding:20px">暂无数据</td></tr>`}</tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="page-header" style="margin-top:18px"><div class="page-title">📝 四栏笔记</div></div>
+    <div class="notes-grid">
+      <div>
+        <div class="note-label">✓ 保持事项</div>
+        <textarea id="r-keep" placeholder="本周表现不错、下周继续保持的事...">${escapeHTML(curReport.keep)}</textarea>
+      </div>
+      <div>
+        <div class="note-label">⚠️ 问题记录</div>
+        <textarea id="r-problem" placeholder="本周遇到的问题、卡点...">${escapeHTML(curReport.problem)}</textarea>
+      </div>
+      <div>
+        <div class="note-label">🧪 尝试方案</div>
+        <textarea id="r-try" placeholder="为解决问题尝试了什么方法、效果如何...">${escapeHTML(curReport.try)}</textarea>
+      </div>
+      <div>
+        <div class="note-label">🎯 下周预案</div>
+        <textarea id="r-planNext" placeholder="下周具体怎么安排、分几个阶段...">${escapeHTML(curReport.planNext)}</textarea>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap">
+      <button class="btn btn-outline" onclick="saveWeekReport()">💾 保存四栏笔记</button>
+      <button class="btn btn-primary" onclick="generateWeekReport()">📄 一键生成周报文本</button>
+    </div>
+    <div id="reportOutput"></div>
+  `;
+}
+function escapeHTML(s){ return String(s==null?'':s).replace(/[&<>"]/g, c=>({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c])); }
+
+function changeWeek(step){
+  state.currentWeekStart = addDaysStr(state.currentWeekStart, step*7);
+  render();
+}
+
+function saveWeekReport(){
+  const ws = state.currentWeekStart;
+  state.reports[ws] = {
+    keep:    document.getElementById('r-keep').value,
+    problem: document.getElementById('r-problem').value,
+    try:     document.getElementById('r-try').value,
+    planNext:document.getElementById('r-planNext').value,
+  };
+  saveAll(); toast('周报笔记已保存','success');
+}
+
+function generateWeekReport(){
+  // 先保存一次最新四栏
+  saveWeekReport();
+  const ws = state.currentWeekStart;
+  const rep = state.reports[ws] || {};
+  const curRange = Array.from({length:7},(_,i)=>addDaysStr(ws, i));
+  const prevRange = Array.from({length:7},(_,i)=>addDaysStr(ws, i-7));
+
+  const sumFor = (range)=>{
+    const byGoal = {}; let totalDays = new Set(); let totalMin = 0;
+    for(const g of state.goals) byGoal[g.id] = {amount:0, days:0, minutes:0, goal:g};
+    for(const r of state.records){
+      if(!byGoal[r.goalId]) continue;
+      if(!range.includes(r.date)) continue;
+      byGoal[r.goalId].amount += Number(r.amount)||0;
+      byGoal[r.goalId].minutes += Number(r.minutes)||0;
+      byGoal[r.goalId].daysSet = byGoal[r.goalId].daysSet || new Set();
+      byGoal[r.goalId].daysSet.add(r.date);
+      totalDays.add(r.date);
+      totalMin += Number(r.minutes)||0;
+    }
+    for(const gid in byGoal) byGoal[gid].days = byGoal[gid].daysSet ? byGoal[gid].daysSet.size : 0;
+    return { byGoal, totalDays: totalDays.size, totalMin };
+  };
+  const cur = sumFor(curRange);
+  const last = sumFor(prevRange);
+
+  const ringDelta = (a,b)=>{
+    if(a>b) return '↗ +'+(a-b);
+    else if(a<b) return '↘ '+(a-b);
+    return '→ 0';
+  };
+
+  let lines = [];
+  lines.push(`# 学习周报 ${ws} ~ ${addDaysStr(ws,6)}`);
+  lines.push('');
+  lines.push(`## 一、总览`);
+  lines.push(`- 打卡天数：**${cur.totalDays} 天**（上周 ${last.totalDays}，${ringDelta(cur.totalDays, last.totalDays)}）`);
+  lines.push(`- 投入分钟：**${cur.totalMin} 分钟**（上周 ${last.totalMin}，${ringDelta(cur.totalMin, last.totalMin)}）`);
+  lines.push(`- 学习目标：共 **${state.goals.length}** 个`);
+  lines.push('');
+  lines.push(`## 二、分目标进展`);
+  const hasGoals = state.goals.length > 0;
+  if(!hasGoals){
+    lines.push('- 暂无目标');
+  }else{
+    for(const g of state.goals){
+      const c = cur.byGoal[g.id]; const p = last.byGoal[g.id];
+      const done = goalDoneAmount(g.id);
+      const pct = (done/g.total*100).toFixed(0);
+      lines.push(`### ${g.name}（${g.total}${g.unit}，已完成 ${done}${g.unit}，${pct}%）`);
+      lines.push(`- 本周完成量：${c.amount}${g.unit}（上周 ${p.amount}，${ringDelta(c.amount, p.amount)}${g.unit}）`);
+      lines.push(`- 打卡天数：${c.days} 天（上周 ${p.days}）`);
+      lines.push(`- 投入时间：${c.minutes} 分钟（上周 ${p.minutes}）`);
+      lines.push('');
+    }
+  }
+  lines.push(`## 三、四栏复盘`);
+  lines.push(`**✅ 保持事项**：${rep.keep || '（未填写）'}`);
+  lines.push('');
+  lines.push(`**⚠️ 问题记录**：${rep.problem || '（未填写）'}`);
+  lines.push('');
+  lines.push(`**🧪 尝试方案**：${rep.try || '（未填写）'}`);
+  lines.push('');
+  lines.push(`**🎯 下周预案**：${rep.planNext || '（未填写）'}`);
+  lines.push('');
+  lines.push('---');
+  lines.push('_由学习目标工作台自动生成_');
+
+  const txt = lines.join('\n');
+  const out = document.getElementById('reportOutput');
+  out.innerHTML = `<div class="card" style="padding:0;overflow:hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border)">
+        <span style="font-weight:700;font-size:14px">📄 生成结果（可复制）</span>
+        <button class="btn btn-outline" style="padding:5px 10px;font-size:12px" onclick='copyReportText(${JSON.stringify(txt.replace(/'/g,"\\'"))})'>${svgi('COPY')} 复制全文</button>
+      </div>
+      <div class="report-box">${escapeHTML(txt)}</div>
+    </div>`;
+}
+function copyReportText(t){
+  const ta = document.createElement('textarea');
+  ta.value = t; document.body.appendChild(ta); ta.select();
+  try{ document.execCommand('copy'); toast('周报文本已复制到剪贴板','success'); }catch(e){ toast('复制失败','error'); }
+  ta.remove();
+}
+
+/* ========== 我的 Tab 渲染 ========== */
+function renderMine(){
+  const box = document.getElementById('tab-mine');
+  const totalRecords = state.records.length;
+  const totalGoals = state.goals.length;
+  const backupBannerDismissed = state.backupReminderDismissed;
+
+  box.innerHTML = `
+    <div class="page-header"><div class="page-title">我的</div></div>
+
+    <div class="stat-card" style="background:var(--grad);color:#fff;border:none">
+      <div class="label" style="color:rgba(255,255,255,.85)">学习旅程</div>
+      <div class="value" style="color:#fff">目标 ${totalGoals} · 打卡 ${totalRecords} 次</div>
+      <div class="delta" style="color:rgba(255,255,255,.85)">数据全部存储在你自己的浏览器 localStorage 中</div>
+    </div>
+
+    <h3 class="section-title">${svgi('DOWNLOAD')} 数据管理</h3>
+
+    <div class="data-card">
+      <div class="data-info">
+        <div class="t">导出全部数据为 JSON 文件</div>
+        <div class="d">建议定期导出备份，避免浏览器缓存丢失</div>
+      </div>
+      <button class="btn btn-primary" onclick="exportJSON()">${svgi('EXPORT')} 导出</button>
+    </div>
+
+    <div class="data-card">
+      <div class="data-info">
+        <div class="t">从 JSON 文件导入数据</div>
+        <div class="d">将覆盖现有全部数据，导入前会弹窗二次确认</div>
+      </div>
+      <button class="btn btn-outline" onclick="triggerImport()">${svgi('IMPORT')} 导入</button>
+      <input id="importFileInput" type="file" accept="application/json" style="display:none" onchange="importJSON(event)">
+    </div>
+
+    <div class="data-card">
+      <div class="data-info">
+        <div class="t">旧版本数据迁移</div>
+        <div class="d">兼容读取旧版存储结构（若有）并合并到当前结构</div>
+      </div>
+      <button class="btn btn-outline" onclick="migrateOldData()">${svgi('SPARK')} 执行迁移</button>
+    </div>
+
+    <div class="data-card">
+      <div class="data-info">
+        <div class="t">清空示例数据</div>
+        <div class="d">仅移除带有「示例」标记的预置数据与预置记录，保留你自己创建的内容</div>
+      </div>
+      <button class="btn btn-outline" onclick="clearSampleData()">🧹 清空示例</button>
+    </div>
+
+    <div class="data-card" style="border-color:#FECACA;background:#FEF2F2">
+      <div class="data-info">
+        <div class="t" style="color:var(--danger)">危险操作：删除全部数据</div>
+        <div class="d">这将清空所有目标、记录、周报。请先导出备份。</div>
+      </div>
+      <button class="btn btn-danger" onclick="confirmWipeAll()">💀 删除全部</button>
+    </div>
+
+    <h3 class="section-title">${svgi('SHARE')} 添加到手机主屏幕</h3>
+    <div class="card">
+      <div class="homescreen-steps">
+        <div class="hs-step">
+          <div class="hs-step-num">1</div>
+          <div class="hs-step-body">
+            <h4>用手机浏览器打开本页面</h4>
+            <p>将 learning-dashboard.html 发送到手机（微信、AirDrop 等），用 Safari (iOS) 或 Chrome (Android) 打开。<br>本应用完全离线可用，加载一次后断网依然正常运行。</p>
+          </div>
+        </div>
+        <div class="hs-step">
+          <div class="hs-step-num">2</div>
+          <div class="hs-step-body">
+            <h4>点击「分享 / 菜单」按钮</h4>
+            <p><strong>iOS Safari</strong>：点击底部中间的分享按钮（方框↑）<br>
+               <strong>Android Chrome</strong>：点击右上角 ⋮ 菜单，选择「添加到主屏幕」或「安装应用」</p>
+          </div>
+        </div>
+        <div class="hs-step">
+          <div class="hs-step-num">3</div>
+          <div class="hs-step-body">
+            <h4>选择「添加到主屏幕」</h4>
+            <p>iOS 向下滑动分享菜单找到「添加到主屏幕」，命名后即可像普通 App 一样从桌面启动，全屏显示。<br>Android 会自动创建桌面图标和快捷方式。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:24px;text-align:center;color:var(--text-sec);font-size:12px;padding-bottom:20px">
+      Learning Dashboard · 本地优先 · 离线可用 · 无账号无广告
+    </div>
+  `;
+}
+
+/* ========== 数据管理实现 ========== */
+function exportJSON(){
+  const blob = new Blob([JSON.stringify({
+    version: 2,
+    exportedAt: new Date().toISOString(),
+    goals: state.goals,
+    records: state.records,
+    reports: state.reports,
+  }, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `learning-dashboard-${todayStr()}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 5000);
+  toast('已导出 JSON 文件','success');
+  state.backupReminderDismissed = true; saveAll();
+  updateBackupBanner();
+}
+
+function triggerImport(){ document.getElementById('importFileInput').click(); }
+function importJSON(ev){
+  const f = ev.target.files[0];
+  if(!f) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      const data = JSON.parse(reader.result);
+      if(!data || !Array.isArray(data.goals) || !Array.isArray(data.records)){
+        throw new Error('文件格式不正确');
+      }
+      confirmModal({
+        title:'确认导入并覆盖？',
+        message:`将用该文件中的 <strong>${data.goals.length} 个目标 + ${data.records.length} 条记录</strong> 覆盖你现有的所有数据。<br><span style="color:var(--danger)">现有数据将不可恢复，建议先导出备份。</span>`,
+        confirmText:'确认覆盖导入', danger:true,
+        onConfirm(){
+          state.goals = data.goals.map(normalizeGoalSchedule);
+          state.records = data.records;
+          state.reports = (data.reports && typeof data.reports==='object') ? data.reports : {};
+          saveAll(); toast('导入成功','success'); render();
+        }
+      });
+    }catch(e){ toast('读取失败：'+e.message,'error'); }
+  };
+  reader.readAsText(f);
+  ev.target.value = '';
+}
+
+function migrateOldData(){
+  // 兼容老版本 key 或结构
+  const CANDIDATES = ['learning_dashboard','learning_tracker_v1','study_tracker','goals_app_v1'];
+  let imported = false;
+  for(const k of CANDIDATES){
+    if(k === LS_KEY) continue;
+    const raw = localStorage.getItem(k);
+    if(!raw) continue;
+    try{
+      const d = JSON.parse(raw);
+      if(Array.isArray(d.goals)){
+        // 合并目标（同名跳过）
+        const existNames = new Set(state.goals.map(g=>g.name));
+        for(const g of d.goals){
+          if(existNames.has(g.name)) continue;
+          state.goals.push(normalizeGoalSchedule({
+            id: uid(), name:g.name||'未命名', unit:g.unit||'个', total:Math.max(1,Number(g.total)||100),
+            deadline:g.deadline||'', color:g.color||COLOR_PALETTE[0].bg,
+            obstacle:g.obstacle||'', strategy:g.strategy||'',
+            scheduleType:g.scheduleType||'daily', repeatDays:g.repeatDays,
+            createdAt: g.createdAt||new Date().toISOString(),
+          }));
+        }
+        // 合并记录
+        if(Array.isArray(d.records)){
+          for(const r of d.records){
+            if(!r.goalId) continue;
+            state.records.push({
+              id: uid(), goalId:r.goalId, date:r.date||todayStr(),
+              amount:Number(r.amount)||0, minutes:Number(r.minutes)||0,
+              isMakeup:!!r.isMakeup, isRestDay:!!r.isRestDay, note:r.note||'',
+            });
+          }
+        }
+        imported = true;
+      }
+    }catch(e){ console.warn('migrate error', k, e); }
+  }
+  if(!imported){ toast('没有发现可迁移的旧数据','info'); return; }
+  saveAll(); toast('迁移完成，请检查数据','success'); render();
+}
+
+function clearSampleData(){
+  const beforeG = state.goals.length, beforeR = state.records.length;
+  state.goals = state.goals.filter(g => !g._sample);
+  const remainGIds = new Set(state.goals.map(g=>g.id));
+  state.records = state.records.filter(r => remainGIds.has(r.goalId) && !r._sample);
+  if(beforeG === state.goals.length && beforeR === state.records.length){
+    toast('没有找到示例数据','info'); return;
+  }
+  saveAll();
+  toast(`已清理示例：目标 ${beforeG-state.goals.length} 条 / 记录 ${beforeR-state.records.length} 条`,'success');
+  render();
+}
+
+function confirmWipeAll(){
+  modal({
+    title:'删除全部数据',
+    bodyHTML: `<p style="line-height:1.7;color:#374151">
+      此操作将删除 <strong style="color:var(--danger)">所有目标、所有打卡记录、所有周报笔记</strong>，且不可恢复。<br><br>
+      请在下方输入「<strong>清空</strong>」二字进行确认：
+    </p>
+    <input type="text" id="wipeWord" placeholder="请输入：清空" style="margin-top:8px;width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:10px;outline:none;font-weight:700;letter-spacing:2px">
+    `,
+    footer: `<button class="btn btn-outline" data-c>取消</button>
+             <button class="btn btn-danger" data-ok>删除全部</button>`,
+    onMount(body, close){
+      body.parentElement.querySelector('[data-c]').onclick = close;
+      body.parentElement.querySelector('[data-ok]').onclick = ()=>{
+        const val = document.getElementById('wipeWord').value.trim();
+        if(val !== '清空'){ toast('请输入「清空」二字','error'); return; }
+        state.goals = []; state.records = []; state.reports = {}; state.backupReminderDismissed=false;
+        localStorage.removeItem(LS_KEY);
+        saveAll(); close(); toast('已重置为干净状态','success'); initSample(); render();
+      };
+    }
+  });
+}
+
+/* 备份横幅控制 */
+function updateBackupBanner(){
+  const banner = document.getElementById('backupBanner');
+  if(state.backupReminderDismissed || state.records.length < 20){ banner.style.display='none'; return; }
+  document.getElementById('bannerText').textContent = `💡 您已累积 ${state.records.length} 条打卡记录，建议导出备份以防数据丢失`;
+  banner.style.display = 'flex';
+}
+
+/* ========== 预置示例数据 ========== */
+function initSample(){
+  if(state.goals.length > 0) return; // 已有数据不覆盖
+  const today = todayStr();
+  // 3个目标
+  const g1 = { id:uid(), name:'背英语单词',       unit:'个', total:2000, deadline:addDaysStr(today, 90), color:COLOR_PALETTE[0].bg,
+               scheduleType:'daily', repeatDays:[...ALL_WEEKDAYS],
+               obstacle:'早上起不来，背单词容易困', strategy:'把单词卡片放到枕头边，醒了先拿手机 App 背 10 分钟再起床',
+               createdAt: new Date(Date.now() - diffDays(today, addDaysStr(today,-20))*86400000).toISOString(),
+               _sample:true };
+  const g2 = { id:uid(), name:'读《人类简史》',     unit:'页', total:440,  deadline:addDaysStr(today, 45), color:COLOR_PALETTE[2].bg,
+               scheduleType:'daily', repeatDays:[...ALL_WEEKDAYS],
+               obstacle:'刷手机之后就忘了看书', strategy:'每晚把平板放客厅，床头只放一本书和一个小夜灯',
+               createdAt: new Date(Date.now() - diffDays(today, addDaysStr(today,-14))*86400000).toISOString(),
+               _sample:true };
+  const g3 = { id:uid(), name:'Python入门课',      unit:'节', total:52,   deadline:addDaysStr(today, 120), color:COLOR_PALETTE[1].bg,
+               scheduleType:'daily', repeatDays:[...ALL_WEEKDAYS],
+               obstacle:'', strategy:'',
+               createdAt: new Date(Date.now() - diffDays(today, addDaysStr(today,-8))*86400000).toISOString(),
+               _sample:true };
+  state.goals.push(g1, g2, g3);
+
+  // 构造记录：多状态（补记、休息日、连续漏打、分钟数）
+  // g1：背单词 —— 20天，最近7天每天打卡良好，14-20天前正常
+  // 故意构造：昨日漏打卡、前一天前有一次补记、周末（周六）休息一次
+  const records = [];
+  // 以今天为 d0
+  // g1 ：d-2 至 d-8 每天有正常记录；d-1 昨日漏（不加记录）
+  for(const dayOffset of [-19,-18,-17,-16,-15,-14,-13,-12,-11,-10,-9,-8,-7,-6,-5,-4,-3,-2]){
+    records.push({ id:uid(), goalId:g1.id, date:addDaysStr(today, dayOffset),
+      amount: 25+Math.floor(Math.random()*10), minutes:20+Math.floor(Math.random()*15),
+      isMakeup:false, isRestDay:false, note:'', _sample:true });
+  }
+  // d-6 再加一条补记（isMakeup=true），模拟 d-13 原本漏打，在 d-6 补
+  records.push({ id:uid(), goalId:g1.id, date:addDaysStr(today,-13),
+    amount: 30, minutes: 0, isMakeup:true, isRestDay:false, note:'周三那天忘记打，今天补', _sample:true });
+  // d-10 标记为休息日（isRestDay=true）
+  records.push({ id:uid(), goalId:g1.id, date:addDaysStr(today,-10),
+    amount:0, minutes:0, isMakeup:false, isRestDay:true, note:'周末出游休息', _sample:true });
+
+  // g2 ：读人类简史 —— 建立 14 天，最近 2 天没打（会触发本周第二次漏打=红卡），记录里含分钟数
+  for(const dayOffset of [-14,-13,-12,-11,-10,-9,-7,-6,-5,-4]){ // 跳过 -8 和 -3,-2,-1
+    records.push({ id:uid(), goalId:g2.id, date:addDaysStr(today, dayOffset),
+      amount: 10+Math.floor(Math.random()*15), minutes:30+Math.floor(Math.random()*40),
+      isMakeup:false, isRestDay:false, note:'', _sample:true });
+  }
+  // -3：补记（周日）
+  records.push({ id:uid(), goalId:g2.id, date:addDaysStr(today,-3),
+    amount: 16, minutes: 50, isMakeup:true, isRestDay:false, note:'昨晚没来得及，今天补上', _sample:true });
+
+  // g3 ：Python入门 —— 建立 8 天，打了前4天，连续漏打 3 天（-6,-5,-4 无记录），然后昨天补上
+  for(const dayOffset of [-8,-7,-6,-5]){
+    records.push({ id:uid(), goalId:g3.id, date:addDaysStr(today, dayOffset),
+      amount: 1, minutes: 45, isMakeup:false, isRestDay:false, note:'', _sample:true });
+  }
+  records.push({ id:uid(), goalId:g3.id, date:addDaysStr(today,-1),
+    amount: 2, minutes: 90, isMakeup:true, isRestDay:false, note:'补记昨天连看两节', _sample:true });
+
+  state.records = records;
+  saveAll();
+}
+
+/* ========== 导航渲染与切换 ========== */
+function renderNav(){
+  // 侧边栏
+  const side = document.getElementById('sideNav');
+  side.innerHTML = TAB_LIST.map(t=>`
+    <button class="tab-btn ${state.activeTab===t.key?'active':''}" data-tab="${t.key}">
+      ${svgi(t.icon)}
+      <span>${t.name}</span>
+    </button>`).join('');
+  const footer = document.getElementById('sideFooter');
+  footer.innerHTML = `目标 ${state.goals.length} · 记录 ${state.records.length}<br>数据仅存于本机`;
+
+  // 顶部导航（平板）
+  const top = document.getElementById('topTabs');
+  top.innerHTML = TAB_LIST.map(t=>`
+    <button class="tab-btn ${state.activeTab===t.key?'active':''}" data-tab="${t.key}">
+      ${svgi(t.icon)}
+      <span>${t.name}</span>
+    </button>`).join('');
+
+  // 底部导航（手机）
+  const bar = document.getElementById('tabbar');
+  bar.innerHTML = TAB_LIST.map(t=>`
+    <button class="tab-btn ${state.activeTab===t.key?'active':''}" data-tab="${t.key}">
+      ${svgi(t.icon)}
+      <span>${t.name}</span>
+    </button>`).join('');
+
+  // 绑定
+  document.querySelectorAll('[data-tab]').forEach(b=>{
+    b.addEventListener('click', ()=>switchTab(b.getAttribute('data-tab')));
+  });
+}
+
+function switchTab(k){
+  if(!TAB_LIST.find(t=>t.key===k)) return;
+  state.activeTab = k;
+  document.querySelectorAll('.tab-panel').forEach(p=>p.style.display='none');
+  const el = document.getElementById('tab-'+k);
+  if(el) el.style.display = '';
+  renderNav(); render();
+  window.scrollTo(0,0);
+}
+
+/* ========== 全局 Render ========== */
+function render(){
+  renderToday();
+  renderKanban();
+  renderWeekly();
+  renderMine();
+  updateBackupBanner();
+  renderPomodoroBar();
+}
+
+/* ========== 初始化 ========== */
+window.addEventListener('DOMContentLoaded', ()=>{
+  const loaded = loadAll();
+  if(!loaded){
+    initSample();
+  }
+  // 横幅：点击导出
+  document.getElementById('bannerExportBtn').addEventListener('click', exportJSON);
+  // 默认今日 tab
+  document.getElementById('tab-today').style.display = '';
+  renderNav();
+  render();
+});
+
+/* 全局异常捕获（防止整页白屏） */
+window.addEventListener('error', (e)=>{
+  try{
+    console.error('[AppError]', e.message, e.filename, e.lineno);
+    toast('出错了：'+e.message, 'error');
+  }catch(_){}
+});
+</script>
+</body>
+</html>

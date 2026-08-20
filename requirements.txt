@@ -1,2 +1,7 @@
 PySide6>=6.6.0
+pywebview>=5.0,<6
+pyobjc-core>=9.0,<12; sys_platform == "darwin"
+pyobjc-framework-Cocoa<12; sys_platform == "darwin"
+pyobjc-framework-WebKit<12; sys_platform == "darwin"
 # Python 标准库已包含：sqlite3, json, datetime, threading
+# pywebview: macOS 用 WKWebView（原生），Windows 用 EdgeChromium，Linux 用 GTK
